@@ -2,11 +2,11 @@
 
 
 # BTReport 
-[arXiv](#arxiv) | [BibTeX](#bibtex)
+[arXiv](./assets/MIDL_2026_BTReport__Latest_.pdf) | [BibTeX](./assets/MIDL_2026_BTReport__Latest_.pdf)
 
 <!-- [![arXiv](https://img.shields.io/badge/arXiv-2112.1075-b31b1b.svg)](https://arxiv.org/abs/2112.1075)  -->
 
-[**BTReport: A Framework for Brain Tumor Radiology Report Generation with Clinically Relevant Features**](#arxiv)<br/>
+[**BTReport: A Framework for Brain Tumor Radiology Report Generation with Clinically Relevant Features**](./assets/MIDL_2026_BTReport__Latest_.pdf)<br/>
 
 
 <p align="center">
