@@ -16,6 +16,7 @@ def main():
     parser.add_argument("--ed_label", type=int, default=2)
     parser.add_argument("--et_label", type=int, default=4)
     parser.add_argument("--llm", type=str, default="gpt-oss:120b")
+    parser.add_argument("--eval", action="store_true", help='Running evaluation after generation.')
 
     args = parser.parse_args()
 

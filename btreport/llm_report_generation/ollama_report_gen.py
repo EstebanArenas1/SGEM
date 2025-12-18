@@ -84,7 +84,7 @@ Preserve all of the subsections in the example findings reports
 Choose the top 10 metadata entries, as true reports report around 7-10 facts.
 Prioritize abnormal or clinically significant findings.
 Only T1n, T2w, T2 Flair, and T1-Gd were obtained, so do not comment on features like diffusion.
-Remember to comment on midline shift in the style of the reports.
+Remember to comment on midline shift in the style of the reports. 
 Comment on the effacement of ventricles if present according to the metadata, and give details on the side and if the effacement is in the anterior/posterior horns.
 Do NOT mention measurements, structures, or features unless supported by the metadata.  
 Do NOT mention modalities or sequences not given.  

@@ -1,6 +1,6 @@
 from .utils import register, plotting, anat_segmentation
 from .utils.log import get_logger
-from .llm_report_generation.ollama_report_gen_v2 import generate_llm_report
+from .llm_report_generation.ollama_report_gen import generate_llm_report
 from .midline_shift.midline_shift3d import midline_shift_3d
 from .vasari_features import ExtractVASARI
 # from .vasari_features.extract_vasari_features import vasari_features
@@ -20,7 +20,7 @@ python3 -m btreport.generate_report --subject_folder $SF --llm llama3:70b
 python3 -m btreport.eval_json --skip_processed --no-parse-synthetic --do_details --json /pscratch/sd/j/jehr/MSFT/BTReport/data/example/merged_reports_btreport_llama3_70b.json
 """
 
-
+# python3 -m btreport.eval_json --skip_processed --no-parse-synthetic --do_details --json /pscratch/sd/j/jehr/MSFT/BTReport_evaluation/from-segmentation-to-explanation/savedv1/seg2exp_reports_uwimaging_22513869714470.json
 def main(args: argparse.Namespace):
     # modality_paths = get_modality_paths(args.subject_folder)
     # t1_path = modality_paths['t1']
@@ -77,7 +77,7 @@ def main(args: argparse.Namespace):
     anat_segmentation.synthseg(input_path=mni_in_subj, output_path=anatseg)
 
     # Merge tumor, midline, and anatomical segmentation masks
-    anat_segmentation.merge_tumor_midline_and_anat_masks(
+    overlap_regions = anat_segmentation.merge_tumor_midline_and_anat_masks(
         synthseg_path=anatseg,
         tumor_path=tumor_path,
         midline_path=midline_out,
@@ -88,6 +88,8 @@ def main(args: argparse.Namespace):
         tumor_type=metadata.get('tumor-type', 'glioma'),
         overwrite=args.overwrite,
     )
+    metadata.update({'Anatomical Overlap Regions': overlap_regions})
+
     logger.info(f'* Finished segmentation steps! Merged mask can be found in {merged_seg}')
 
 
@@ -105,6 +107,7 @@ def main(args: argparse.Namespace):
     metadata_no_clinical={k: v for k, v in metadata.items() if k != "Clinical Report"}
 
     keys_to_keep = [
+        "Anatomical Overlap Regions",
         "Tumor Location",
         "Side of Tumor Epicenter",
         "Number of lesions",
@@ -120,10 +123,10 @@ def main(args: argparse.Namespace):
         "CET Crosses midline",
         "Enhancement Quality",
         "Thickness of enhancing margin",
-        "NCR Volume (mL)",
-        "ED Volume (mL)",
-        "ET Volume (mL)",
-        "Total tumor volume (mL)",
+        # "NCR Volume (mL)",
+        # "ED Volume (mL)",
+        # "ET Volume (mL)",
+        # "Total tumor volume (mL)",
         "Proportion Enhancing",
         "Proportion Necrosis",
         "Proportion of Oedema",
@@ -131,6 +134,7 @@ def main(args: argparse.Namespace):
         "Region Proportions",
         "level_max_shift",
         "max_shift_mm",
+        "midline_shift_present",
         "Text Report"
     ]
     refined_metadata = {k: v for k, v in metadata_no_clinical.items() if k in keys_to_keep}

@@ -3,8 +3,8 @@ import os, json
 
 def merge_reports_into_json(root_dir,
                             real_report_key="Clinical Report",
-                            generated_report_key="BTReport Generated Report (llama3:70b)",
-                            output_filename="merged_reports_btreport_llama3_70b.json"):
+                            generated_report_key="BTReport Generated Report (gpt-oss:120b)",
+                            output_filename="merged_reports_btreport_gptoss_120b.json"):
     """
     Walks through all subfolders of root_dir.
     Reads patient_metadata_btreport.json in each folder.
@@ -50,4 +50,4 @@ def merge_reports_into_json(root_dir,
 
 
 if __name__ == '__main__':
-     merge_reports_into_json(root_dir='../../data/example')
+     merge_reports_into_json(root_dir='../../data/example_test2')

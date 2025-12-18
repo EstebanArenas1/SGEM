@@ -274,6 +274,101 @@ def to_builtin(obj):
         return obj
 
 
+# def update_midline(
+#     subject_midline_path,
+#     ideal_midline_path,
+#     tumor_mask_path,
+#     updated_midline_save_path,
+#     overwrite=False,
+#     crosses_threshold=200,
+#     verbose=False,
+#     ncr_label=1,
+#     ed_label=2,
+#     et_label=3,
+# ):
+#     """
+#     Updates the midline to handle cases where the tumor extends across the anatomical midline.
+#     In such cases, the updated midline is defined as the boundary of the combined (non-enhancing core + enhancing tumor) region on the side opposite the tumor's dominant bulk.
+#     """
+#     subject_midline_im = nib.load(subject_midline_path)
+#     subject_midline = subject_midline_im.get_fdata()
+#     binary_midline = np.asarray(subject_midline) > 0
+
+#     binary_ideal_midline = nib.load(ideal_midline_path).get_fdata() > 0
+
+#     tumor_mask = nib.load(tumor_mask_path).get_fdata()
+#     binary_ncr = select_regions(tumor_mask, [0, ncr_label]) > 0
+#     binary_ed = select_regions(tumor_mask, [0, ed_label]) > 0
+#     binary_et = select_regions(tumor_mask, [0, et_label]) > 0
+#     binary_ncr_et = select_regions(tumor_mask, [0, ncr_label, et_label]) > 0
+
+#     overlaps = []
+#     volumes = []
+
+#     sides = ["left", "right"]
+
+#     data = defaultdict(dict)
+
+#     subregion_volumes = defaultdict(list)
+#     subregion_overlaps = defaultdict(list)
+#     smallest_volume = {}
+#     crosses_midline = {}
+
+#     subregion_volumes_ideal = defaultdict(list)
+#     subregion_overlaps_ideal = defaultdict(list)
+#     smallest_volume_ideal = {}
+#     subregions = {"ncr": binary_ncr, "ed": binary_ed, "et": binary_et, "ncr_et": binary_ncr_et}
+#     for region in subregions.keys():
+#         volumes = split_mask_by_midline(binary_midline=binary_midline, mask=subregions[region])
+#         volumes_ideal = split_mask_by_midline(binary_midline=binary_ideal_midline, mask=subregions[region])
+#         for direction in sides:  # left, right
+#             vol = volumes[direction]
+#             overlap = np.sum(vol)
+#             subregion_volumes[region].append(vol)
+#             subregion_overlaps[region].append(overlap)
+
+#             vol_ideal = volumes_ideal[direction]
+#             overlap_ideal = np.sum(vol_ideal)
+#             subregion_volumes_ideal[region].append(vol_ideal)
+#             subregion_overlaps_ideal[region].append(overlap_ideal)
+
+#         smallest_volume[region] = subregion_volumes[region][np.argmin(subregion_overlaps[region])]
+#         smallest_volume_ideal[region] = subregion_overlaps_ideal[region][np.argmin(subregion_overlaps[region])]
+#         if verbose:
+#             logger.info(
+#                 f"Tumor size {region}, volumes {subregion_overlaps[region]}; Primary side: {sides[np.abs(1-np.argmin(subregion_overlaps[region]))]}"
+#             )
+#             logger.info(
+#                 f"[ideal midline] Tumor size {region}, volumes {subregion_overlaps_ideal[region]}; Primary side: {sides[np.abs(1-np.argmin(subregion_overlaps_ideal[region]))]}"
+#             )
+#             logger.info(
+#                 f"crosses midline {region}: {subregion_overlaps_ideal[region][np.argmin(subregion_overlaps_ideal[region])]>crosses_threshold}"
+#             )
+
+#         data["volumes_ideal_midline"][region] = dict(zip(sides, subregion_overlaps_ideal[region]))
+#         data["crosses_ideal_midline"][region] = subregion_overlaps_ideal[region][np.argmin(subregion_overlaps_ideal[region])] > crosses_threshold
+#         data["primary_side_ideal_midline"][region] = sides[np.argmax(subregion_overlaps_ideal[region])]
+
+#         data["volumes_patient_midline"][region] = dict(zip(sides, subregion_overlaps[region]))
+#         data["primary_side_patient_midline"][region] = sides[np.argmax(subregion_overlaps[region])]
+#         data["crosses_patient_midline"][region] = subregion_overlaps[region][np.argmin(subregion_overlaps[region])] > crosses_threshold
+
+#     dilated = binary_dilation(smallest_volume["ncr_et"], iterations=1)
+#     outer_shell = dilated & (~smallest_volume["ncr_et"])
+#     dilated_t = binary_dilation(binary_ncr_et, iterations=1)
+#     outer_shell_tumor = dilated_t & (~binary_ncr_et)
+#     updated_midline = ~(~(outer_shell_tumor & outer_shell)) | (binary_midline & ~binary_ncr_et)
+
+#     if not os.path.exists(updated_midline_save_path) or overwrite:
+#         nib.save(nib.Nifti1Image(updated_midline.astype(np.uint8), subject_midline_im.affine, subject_midline_im.header), updated_midline_save_path)
+#         logger.info(f'Updated midline to account for tumor... saved updated mask to {updated_midline_save_path}')
+#     else:
+#         logger.info(f'Path {updated_midline_save_path} exists, skipping midline updating save step...')
+
+#     return data
+
+
+
 def update_midline(
     subject_midline_path,
     ideal_midline_path,
@@ -288,7 +383,9 @@ def update_midline(
 ):
     """
     Updates the midline to handle cases where the tumor extends across the anatomical midline.
-    In such cases, the updated midline is defined as the boundary of the combined (non-enhancing core + enhancing tumor) region on the side opposite the tumor's dominant bulk.
+    In such cases, the updated midline is defined as the boundary of the combined (non-enhancing core + enhancing tumor) region
+    on the side opposite the tumor's dominant bulk, unless the core+ET itself crosses the midline, in which case the midline
+    inside that region is zeroed (undefined) so that midline shift is attributed to edema only.
     """
     subject_midline_im = nib.load(subject_midline_path)
     subject_midline = subject_midline_im.get_fdata()
@@ -318,6 +415,10 @@ def update_midline(
     subregion_overlaps_ideal = defaultdict(list)
     smallest_volume_ideal = {}
     subregions = {"ncr": binary_ncr, "ed": binary_ed, "et": binary_et, "ncr_et": binary_ncr_et}
+
+    # -----------------------------
+    # Compute per-side volumes and crossing flags
+    # -----------------------------
     for region in subregions.keys():
         volumes = split_mask_by_midline(binary_midline=binary_midline, mask=subregions[region])
         volumes_ideal = split_mask_by_midline(binary_midline=binary_ideal_midline, mask=subregions[region])
@@ -333,39 +434,64 @@ def update_midline(
             subregion_overlaps_ideal[region].append(overlap_ideal)
 
         smallest_volume[region] = subregion_volumes[region][np.argmin(subregion_overlaps[region])]
-        smallest_volume_ideal[region] = subregion_overlaps_ideal[region][np.argmin(subregion_overlaps[region])]
+        smallest_volume_ideal[region] = subregion_overlaps_ideal[region][np.argmin(subregion_overlaps_ideal[region])]
+
         if verbose:
             logger.info(
-                f"Tumor size {region}, volumes {subregion_overlaps[region]}; Primary side: {sides[np.abs(1-np.argmin(subregion_overlaps[region]))]}"
+                f"Tumor size {region}, volumes {subregion_overlaps[region]}; "
+                f"Primary side: {sides[np.abs(1-np.argmin(subregion_overlaps[region]))]}"
             )
             logger.info(
-                f"[ideal midline] Tumor size {region}, volumes {subregion_overlaps_ideal[region]}; Primary side: {sides[np.abs(1-np.argmin(subregion_overlaps_ideal[region]))]}"
+                f"[ideal midline] Tumor size {region}, volumes {subregion_overlaps_ideal[region]}; "
+                f"Primary side: {sides[np.abs(1-np.argmin(subregion_overlaps_ideal[region]))]}"
             )
             logger.info(
-                f"crosses midline {region}: {subregion_overlaps_ideal[region][np.argmin(subregion_overlaps_ideal[region])]>crosses_threshold}"
+                f"crosses midline {region}: "
+                f"{subregion_overlaps_ideal[region][np.argmin(subregion_overlaps_ideal[region])] > crosses_threshold}"
             )
 
         data["volumes_ideal_midline"][region] = dict(zip(sides, subregion_overlaps_ideal[region]))
-        data["crosses_ideal_midline"][region] = subregion_overlaps_ideal[region][np.argmin(subregion_overlaps_ideal[region])] > crosses_threshold
+        data["crosses_ideal_midline"][region] = (
+            subregion_overlaps_ideal[region][np.argmin(subregion_overlaps_ideal[region])] > crosses_threshold
+        )
         data["primary_side_ideal_midline"][region] = sides[np.argmax(subregion_overlaps_ideal[region])]
 
         data["volumes_patient_midline"][region] = dict(zip(sides, subregion_overlaps[region]))
         data["primary_side_patient_midline"][region] = sides[np.argmax(subregion_overlaps[region])]
-        data["crosses_patient_midline"][region] = subregion_overlaps[region][np.argmin(subregion_overlaps[region])] > crosses_threshold
+        data["crosses_patient_midline"][region] = (
+            subregion_overlaps[region][np.argmin(subregion_overlaps[region])] > crosses_threshold
+        )
 
+
+    crosses_ncr_et = data["crosses_patient_midline"]["ncr_et"]
     dilated = binary_dilation(smallest_volume["ncr_et"], iterations=1)
     outer_shell = dilated & (~smallest_volume["ncr_et"])
+
     dilated_t = binary_dilation(binary_ncr_et, iterations=1)
     outer_shell_tumor = dilated_t & (~binary_ncr_et)
+
     updated_midline = ~(~(outer_shell_tumor & outer_shell)) | (binary_midline & ~binary_ncr_et)
 
+    if crosses_ncr_et:
+        logger.info(f'NCR + ET crosses midline...')
+        updated_midline[binary_ncr_et] = 0
+
+
     if not os.path.exists(updated_midline_save_path) or overwrite:
-        nib.save(nib.Nifti1Image(updated_midline.astype(np.uint8), subject_midline_im.affine, subject_midline_im.header), updated_midline_save_path)
-        logger.info(f'Updated midline to account for tumor... saved updated mask to {updated_midline_save_path}')
+        nib.save(
+            nib.Nifti1Image(updated_midline.astype(np.uint8), subject_midline_im.affine, subject_midline_im.header),
+            updated_midline_save_path,
+        )
+        logger.info(
+            f'Updated midline to account for tumor... saved updated mask to {updated_midline_save_path}'
+        )
     else:
-        logger.info(f'Path {updated_midline_save_path} exists, skipping midline updating save step...')
+        logger.info(
+            f'Path {updated_midline_save_path} exists, skipping midline updating save step...'
+        )
 
     return data
+
 
 
 def merge_masks(masks):
@@ -438,6 +564,12 @@ def midline_distance_fill(ideal_midline_path, deformed_midline_path, midline_dis
     else:
         mean_shift = median_shift = max_shift = p95_shift = None
 
+    midline_shift_present='No'
+    if np.abs(max_shift)  > 5:
+        midline_shift_present='Yes'
+    elif 3 < np.abs(max_shift) < 5:
+        midline_shift_present='Minimal'
+
 
 
     summary = {
@@ -447,6 +579,7 @@ def midline_distance_fill(ideal_midline_path, deformed_midline_path, midline_dis
         "median_shift_mm": median_shift,
         "max_shift_mm": max_shift,
         "p95_shift_mm": p95_shift,
+        "midline_shift_present": midline_shift_present,
         # "max_shift_per_slice_mm": max_shift_per_slice,  # {slice_index: max shift}
     }
     if metadata:

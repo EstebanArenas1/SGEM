@@ -189,7 +189,96 @@ def compute_fact_frequency_distribution(
     return freq_sorted
 
 
+from os.path import join
+import json
+from sentence_transformers import SentenceTransformer
+from sklearn.manifold import TSNE
+import numpy as np
+import matplotlib.pyplot as plt
+
+def tsne_with_legend_save(
+    root='/pscratch/sd/j/jehr/MSFT/BTReport/data/example',
+    json_name="pred_fact_clusters.json",
+    out_name="/pscratch/sd/j/jehr/MSFT/BTReport/data/example/tsne_clusters.png",
+    perplexity=50,
+    figsize=(20, 20),
+    point_size=12,
+    name_chars=20,
+):
+    #  load clusters 
+    with open(join(root, json_name), "r") as f:
+        clusters = json.load(f)
+
+    facts = []
+    labels = []
+    names = {}
+
+    for c in clusters:
+        cid = c["cluster_id"]
+
+        # store truncated name for legend
+        desc = c.get("cluster_description", f"Cluster {cid}")
+        names[cid] = desc[:name_chars]  # truncate
+
+        # collect facts
+        for fact in c["facts"]:
+            facts.append(fact)
+            labels.append(cid)
+
+    labels = np.array(labels)
+    unique_ids = np.unique(labels)
+
+    print(f"Loaded {len(facts)} facts across {len(unique_ids)} clusters.")
+
+    #  embeddings 
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+    emb = model.encode(facts, convert_to_tensor=False)
+
+    #  t-SNE 
+    tsne = TSNE(
+        n_components=2,
+        metric="cosine",
+        perplexity=perplexity,
+        init="pca",
+        random_state=42,
+    )
+    coords = tsne.fit_transform(emb)
+
+    #  plot 
+    plt.figure(figsize=figsize)
+
+    for cid in unique_ids:
+        idx = (labels == cid)
+        label_name = f"{cid}: {names[cid]}"  # formatted name
+        plt.scatter(
+            coords[idx, 0],
+            coords[idx, 1],
+            s=point_size,
+            label=label_name
+        )
+
+    plt.title("t-SNE of Fact Clusters", fontsize=14)
+    plt.axis("off")
+
+    # Legend outside
+    plt.legend(
+        bbox_to_anchor=(1.05, 1),
+        loc="upper left",
+        fontsize=8,
+        ncol=1,
+    )
+
+    out_path = join(root, out_name)
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=300, bbox_inches="tight")
+    plt.close()
+
+    print(f"[OK] Saved t-SNE figure to: {out_path}")
+
+    return coords, labels, facts, names
+
 
 if __name__ == '__main__':
     # main()
-    compute_fact_frequency_distribution()
+    # compute_fact_frequency_distribution() 
+    tsne_with_legend_save()

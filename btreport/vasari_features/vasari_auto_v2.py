@@ -147,6 +147,7 @@ class ExtractVASARI:
         "Number of lesions",
         "Asymmetrical Ventricles",
         "Enlarged Ventricles",
+        "Ventricle Volumes (mm^3) [L/R]",
     ]
 
     def get_laterality(self, segmentation_array):
@@ -407,7 +408,7 @@ class ExtractVASARI:
 
             # Convert to mm
             size_mm = size_voxels * self.resolution
-            TV_mm, AP_mm, CC_mm = size_mm
+            AP_mm, CC_mm, TV_mm = size_mm
 
             # Convert units
             if cm_or_mm == "cm":
@@ -452,7 +453,7 @@ class ExtractVASARI:
         return vol_left_mm, vol_right_mm
 
 
-    def get_ventricle_geometry_statistics(self, merged_anatseg_array, side, thresh_asym=1.25, enlarge_thresh=20e3):
+    def get_ventricle_geometry_statistics(self, merged_anatseg_array, side, thresh_asym=1.45, enlarge_thresh=20e3):
         """
         Compute L/R ventricle volume (mL), asymmetry flag, enlargement flag, and side dominance.
         merged_anatseg : labeled anatomical+tumor segmentation (same format as input to get_ventricle_volumes)
@@ -659,6 +660,7 @@ class ExtractVASARI:
             "ET Volume (mL)": float(et_vol_ml),
             "Total tumor volume (mL)":float(global_vol_ml),
             "Number of lesions":len(lesion_sizes), 
+            "Ventricle Volumes (mm^3) [L/R]": [lvol, rvol], 
         }
 
         end_time = time.time()
@@ -680,6 +682,10 @@ class ExtractVASARI:
             "CET Crosses midline",
             "Asymmetrical Ventricles",
             "Enlarged Ventricles",
+            # "Number of lesions",
+            # "Multiple satellites present",
+            # "Thickness of enhancing margin"
+
         ]
         result = {key: val for key, val in result.items() if key in keys_in_text_report}
         vasari_auto_report = self.translate_vasari_report(vasari_auto_report, map_name="vasari")
