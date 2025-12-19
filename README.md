@@ -44,6 +44,16 @@ The framework consists of four components:
 
 
 
+## Installation
+
+BTReport requires SynthSeg, SynthMorph, and Ollama. For convenience we have packaged the .sif images used in this Zenodo [artifact](https://zenodo.org/records/17982349). To download all of these on an HPC system, use the following command:
+```
+for f in ollama.sif synthseg.sif synthmorph_4.sif; do
+  wget -c https://zenodo.org/records/17982349/files/$f
+done
+```
+
+
 ## Clinically relevant features 
 BTReport extracts a set of interpretable, clinically meaningful variables from each case, including patient demographics, VASARI features, and 3D midline shift measurements. These features summarize key aspects of tumor biology and mass effect that are routinely used in radiology reports and neuro-oncology decision-making. Kaplan–Meier analyses show that many of these features are predictive of overall survival, highlighting their clinical relevance and motivating their use as structured inputs for radiology report generation.
 
