@@ -44,7 +44,7 @@ The framework consists of four components:
 
 
 
-## Installation
+## Installation and Setup
 A suitable [conda](https://conda.io/) environment named `BTReport` can be created
 and activated with:
    ```bash
@@ -58,6 +58,8 @@ for f in ollama.sif synthseg.sif synthmorph_4.sif; do
   wget -c https://zenodo.org/records/17982349/files/$f
 done
 ```
+*Note: downloading all containers (~11 GB total) may take approximately 30 minutes,
+depending on network bandwidth.*
 
 
 ## Clinically relevant features 
