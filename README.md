@@ -45,9 +45,15 @@ The framework consists of four components:
 
 
 ## Installation
+A suitable [conda](https://conda.io/) environment named `BTReport` can be created
+and activated with:
+   ```bash
+   conda env create -f environment.yml
+   conda activate BTReport
+   ```
 
 BTReport requires SynthSeg, SynthMorph, and Ollama. For convenience we have packaged the .sif images used in this Zenodo [artifact](https://zenodo.org/records/17982349). To download all of these on an HPC system, use the following command:
-```
+```bash
 for f in ollama.sif synthseg.sif synthmorph_4.sif; do
   wget -c https://zenodo.org/records/17982349/files/$f
 done
