@@ -54,22 +54,22 @@ See [INSTALL.md](docs/INSTALL.md) for full installation instructions on HPC syst
 ## Usage
 
 
-### Dataset formatting
-BTReport requires each subject's data be separated into individual folders. Each subject folder should include at least two niftii files: a T1 scan with file ending `-t1n.nii.gz` , and the corresponding tumor segmentation mask with file ending `-seg.nii.gz`. Following BraTS convention, segmentations should contain NCR, ED, and ET subregions.  Optionally an additional file with additional patient metadata can be added in a file as `metadata.json`. 
-```text
-data/
-├── subject_001/
-│   ├── <subject_identifier>-t1n.nii.gz
-│   ├── <subject_identifier>-seg.nii.gz
-│   └── metadata.json  
-├── subject_002/
-│   ├── <subject_identifier>-t1n.nii.gz
-│   └── <subject_identifier>-seg.nii.gz
-└── ...
-```
+### 1. Dataset formatting
+  BTReport requires each subject's data be separated into individual folders. Each subject folder should include at least two niftii files: a T1 scan with file ending `-t1n.nii.gz` , and the corresponding tumor segmentation mask with file ending `-seg.nii.gz`. Following BraTS convention, segmentations should contain NCR, ED, and ET subregions.  Optionally an additional file with additional patient metadata can be added in a file as `metadata.json`. 
+  ```text
+  data/
+  ├── subject_001/
+  │   ├── <subject_identifier>-t1n.nii.gz
+  │   ├── <subject_identifier>-seg.nii.gz
+  │   └── metadata.json  
+  ├── subject_002/
+  │   ├── <subject_identifier>-t1n.nii.gz
+  │   └── <subject_identifier>-seg.nii.gz
+  └── ...
+  ```
 
 
-### Set environment variables and start Ollama server
+### 2. Set environment variables and start Ollama server
 * Change the paths in `docs/btreport_paths.sh`  to match those set in [INSTALL.md](docs/INSTALL.md), then run 
   ```bash
   source docs/btreport_paths.sh 
@@ -84,15 +84,15 @@ data/
   ```
 
 
-### Generate a report for a single subject
+### 3. Report generation
+#### For a single subject:
 
 ```bash
 module load apptainer
 conda activate BTReport
 python3 -m btreport.generate_report --subject_folder <path/to/subject/folder> --llm gpt-oss:120b
 ```
-
-### Generate reports for multiple subjects
+#### For a multiple subjects in a directory:
 ```bash
 module load apptainer
 conda activate BTReport
