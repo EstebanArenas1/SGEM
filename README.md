@@ -92,7 +92,7 @@ module load apptainer
 conda activate BTReport
 python3 -m btreport.generate_report --subject_folder <path/to/subject/folder> --llm gpt-oss:120b
 ```
-#### For a multiple subjects in a directory:
+#### For multiple subjects in a directory:
 ```bash
 module load apptainer
 conda activate BTReport
