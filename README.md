@@ -89,10 +89,15 @@ data/
 ```bash
 module load apptainer
 conda activate BTReport
+python3 -m btreport.generate_report --subject_folder <path/to/subject/folder> --llm gpt-oss:120b
 ```
 
 ### Generate reports for multiple subjects
-
+```bash
+module load apptainer
+conda activate BTReport
+python3 -m btreport.run_all_reports --root_folder <path/to/root/folder> --llm llama3:70b
+```
 
 ![-----------------------------------------------------](assets/purpleline.png)
 
