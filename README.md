@@ -6,17 +6,15 @@
 
 <!-- [![arXiv](https://img.shields.io/badge/arXiv-2112.1075-b31b1b.svg)](https://arxiv.org/abs/2112.1075)  -->
 
-[**BTReport: A Framework for Brain Tumor Radiology Report Generation with Clinically Relevant Features**](./assets/MIDL_2026_BTReport__Latest_.pdf)<br/>
-
 
 <p align="center">
 <img src=assets/overview.gif />
 </p>
 
+### [**BTReport: A Framework for Brain Tumor Radiology Report Generation with Clinically Relevant Features**](./assets/MIDL_2026_BTReport__Latest_.pdf)<br/>
 [Juampablo E. Heras Rivera](https://juampabloheras.github.io/)\*, Dickson T. Chen\*, Tianyi Ren, Daniel K. Low,  <br/>
 Jacob Ruzevick, Asma Ben Abacha, Alberto Santamaria-Pang, Mehmet Kurt<br/>
 \*equal contribution
-
 <table>
 <tr>
 <td>
@@ -32,6 +30,7 @@ Jacob Ruzevick, Asma Ben Abacha, Alberto Santamaria-Pang, Mehmet Kurt<br/>
 </tr>
 </table>
 
+![-----------------------------------------------------](assets/purpleline.png)
 
 ## Overview
 BTReport is an open-source framework for brain tumor radiology report generation using quantitative neuroimaging features.  BTReport first extracts clinically relevant features (patient metadata, VASARI features, midline shift) using a patients scan and tumor segmentation mask, then uses large language models for report formatting.
@@ -42,67 +41,60 @@ The framework consists of four components:
 -  **[midline_shift](./btreport/midline_shift/)** — quantitative estimation of 3D midline shift using a deep learning registration approach.
 -  **[llm_report_generation](./btreport/llm_report_generation/)** — LLM synthesis of structured radiology reports grounded in deterministic features.
 
+![-----------------------------------------------------](assets/purpleline.png)
 
 
-## Setup (~1.5 hours)
-* ### Download Apptainer/Singularity images (1 hour)
-  BTReport requires SynthSeg, SynthMorph, and Ollama. For convenience we have packaged the .sif images used in this Zenodo [artifact](https://zenodo.org/records/17982349). To download all of these on an HPC system, use the following command:
+
+## Installation (~1.5 hours)
+See [INSTALL.md](docs/INSTALL.md) for full installation instructions on HPC systems. 
+
+
+![-----------------------------------------------------](assets/purpleline.png)
+
+## Usage
+
+
+### Dataset formatting
+BTReport requires each subject's data be separated into individual folders. Each subject folder should include at least two niftii files: a T1 scan with file ending `-t1n.nii.gz` , and the corresponding tumor segmentation mask with file ending `-seg.nii.gz`. Following BraTS convention, segmentations should contain NCR, ED, and ET subregions.  Optionally an additional file with additional patient metadata can be added in a file as `metadata.json`. 
+```text
+data/
+├── subject_001/
+│   ├── <subject_identifier>-t1n.nii.gz
+│   ├── <subject_identifier>-seg.nii.gz
+│   └── metadata.json  
+├── subject_002/
+│   ├── <subject_identifier>-t1n.nii.gz
+│   └── <subject_identifier>-seg.nii.gz
+└── ...
+```
+
+
+### Set environment variables and start Ollama server
+* Change the paths in `docs/btreport_paths.sh`  to match those set in [INSTALL.md](docs/INSTALL.md), then run 
   ```bash
-  for f in ollama.sif synthseg.sif synthmorph_4.sif; do
-    wget -c https://zenodo.org/records/17982349/files/$f
-  done
+  source docs/btreport_paths.sh 
   ```
-  > *Note: Containers are ~11 GB in total size.*
+  This will set the paths as environment variables and validate that each provided path points to a file/dir. 
 
-* ### Start Ollama server and download LLMs (25 minutes)
-
-  <details><summary><b>Show instructions</b></summary>
-    
-  #### 1. Set environment variables. 
-  
-  OLLAMA_MODELS should be located in a filesystem with large storage capacity, as models are 100s of GB large.
-  ```bash
-  export OLLAMA_SIF=/path/to/ollama.sif
-  export OLLAMA_MODELS=/path/to/ollama_models
-  ```
-  
-  #### 2. Start the Ollama server.
-  On a GPU allocation, start the server in the background (e.g., using tmux), then detach.
+* On a GPU allocation, start the Ollama server in the background (e.g., using tmux), then detach.
   ```bash
   tmux new -t ollama
-  python3 -m btreport.ollama_server start-ollama --gpus 0
-  ```
-  #### 3. Detach from tmux, and return to your original terminal
-  ```bash
+  python3 -m btreport.ollama_server start-ollama --gpus 0,1
   Ctrl-b d
   ```
-  
-  #### 4. In your original terminal, download the LLMs used for generation and evaluation.
-     Here we download [gpt-oss:120b](https://ollama.com/library/gpt-oss:120b) (10 minute download), [llama3:70b](https://ollama.com/library/llama3:70b) (6 minute download), and [deepseek-r1:70b](https://ollama.com/library/deepseek-r1:70b) (6 minute download)
-  
-  ```bash
-  python3 -m btreport.ollama_server pull-llm gpt-oss:120b
-  python3 -m btreport.ollama_server pull-llm llama3:70b
-  python3 -m btreport.ollama_server pull-llm deepseek-r1:70b
-  ```
-  </details>
 
 
-* ### Create conda environment (5 minutes)
-  A suitable [conda](https://conda.io/) environment named `BTReport` can be created
-  and activated with:
-     ```bash
-     conda env create -f environment.yml
-     conda activate BTReport
-     ```
-  
+### Generate a report for a single subject
+
+```bash
+module load apptainer
+conda activate BTReport
+```
+
+### Generate reports for multiple subjects
 
 
-
-
-
-
-
+![-----------------------------------------------------](assets/purpleline.png)
 
 ## Dataset
 We provide a companion dataset which augments BraTS imaging with these features to further research in neuro-oncology report generation.

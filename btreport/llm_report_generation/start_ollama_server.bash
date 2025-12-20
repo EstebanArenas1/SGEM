@@ -22,3 +22,8 @@ apptainer exec --nv \
     -B /pscratch:/pscratch \
     -B /cvmfs:/cvmfs \
     "$IMAGE" ollama serve 
+
+
+apptainer exec --nv \
+    -B "$(dirname "$OLLAMA_MODELS")":"$(dirname "$OLLAMA_MODELS")" \
+    "$OLLAMA_SIF" \
