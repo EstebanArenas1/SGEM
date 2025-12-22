@@ -103,6 +103,11 @@ conda activate BTReport
 python3 -m btreport.run_all_reports --root_folder <path/to/root/folder> --llm llama3:70b
 ```
 
+### 4. Evaluation against real report
+
+
+
+
 ![-----------------------------------------------------](assets/purpleline.png)
 
 ## Dataset
