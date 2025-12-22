@@ -53,7 +53,7 @@ VASARI_MAPS = {
     "CET Crosses midline": {3: "True", 2: "False"},  #
     "Multiple satellites present": {1: "Absent", 2: "Present"},
     "Asymmetrical Ventricles": {0: "Absent", 1: "Present"},
-    "Enlarged Ventricles": {0: "Absent", 1: "Present"},
+    # "Enlarged Ventricles": {0: "Absent", 1: "Present"},
 }
 
 VASARI_SENTENCE_MAPS = {
@@ -127,7 +127,7 @@ VASARI_SENTENCE_MAPS = {
     "CET Crosses midline": {2: "Enhancing component does not cross the midline.", 3: "Enhancing component extends across the midline."},
     "Multiple satellites present": {1: "No satellite lesions identified.", 2: "Satellite foci are present adjacent to the main lesion."},
     "Asymmetrical Ventricles": {0: "No tumor-associated ventricular asymmetry.", 1: "Ventricular asymmetry present on the tumor side."},
-    "Enlarged Ventricles": {0: "Ventricles are not enlarged.", 1: "Ventricular enlargement is present."},
+    # "Enlarged Ventricles": {0: "Ventricles are not enlarged.", 1: "Ventricular enlargement is present."},
 }
 
 VASARI_CONCISE_MAPS = {
@@ -179,7 +179,7 @@ VASARI_CONCISE_MAPS = {
     "CET Crosses midline": {2: "enhancing region does not cross midline", 3: "enhancing region crosses midline"},
     "Multiple satellites present": {1: "no satellite lesions", 2: "satellite lesions present"},
     "Asymmetrical Ventricles": {0: "no tumor-associated ventricular asymmetry", 1: "tumor-side ventricular asymmetry"},
-    "Enlarged Ventricles": {0: "ventricles not enlarged", 1: "ventricles enlarged"},
+    # "Enlarged Ventricles": {0: "ventricles not enlarged", 1: "ventricles enlarged"},
 }
 
 VASARI_REASONING_MAPS = {
@@ -278,10 +278,10 @@ VASARI_REASONING_MAPS = {
         0: "Ventricle volumes were similar between hemispheres with no evidence of compression. No ventricular asymmetry identified.",
         1: "The ventricle on the tumor side showed reduced volume relative to the contralateral side, consistent with local mass effect. Tumor-associated ventricular asymmetry is present.",
     },
-    "Enlarged Ventricles": {
-        0: "Measured ventricle volumes were within the expected range without significant dilation. Ventricles are not enlarged.",
-        1: "One or both lateral ventricles exceeded the volume threshold indicating dilation. Ventricular enlargement is present.",
-    },
+    # "Enlarged Ventricles": {
+    #     0: "Measured ventricle volumes were within the expected range without significant dilation. Ventricles are not enlarged.",
+    #     1: "One or both lateral ventricles exceeded the volume threshold indicating dilation. Ventricular enlargement is present.",
+    # },
 }
 
 

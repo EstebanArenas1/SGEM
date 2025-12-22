@@ -137,6 +137,7 @@ class ExtractVASARI:
         "CET Crosses midline",
         "Multiple satellites present",
         "Asymmetrical Ventricles",
+        "Effaced Ventricle",
         "Enlarged Ventricles",
         "Region Proportions",
         "Lesion Sizes APxTVxCC (cm)",
@@ -147,7 +148,8 @@ class ExtractVASARI:
         "Number of lesions",
         "Asymmetrical Ventricles",
         "Enlarged Ventricles",
-        "Ventricle Volumes (mm^3) [L/R]",
+        "Left Ventricle Volume (mm^3)",
+        "Right Ventricle Volume (mm^3)",
     ]
 
     def get_laterality(self, segmentation_array):
@@ -455,7 +457,7 @@ class ExtractVASARI:
 
     def get_ventricle_geometry_statistics(self, merged_anatseg_array, side, thresh_asym=1.45, enlarge_thresh=20e3):
         """
-        Compute L/R ventricle volume (mL), asymmetry flag, enlargement flag, and side dominance.
+        Compute Left/Right ventricle volume (mL), asymmetry flag, enlargement flag, and side dominance.
         merged_anatseg : labeled anatomical+tumor segmentation (same format as input to get_ventricle_volumes)
         """
 
@@ -486,7 +488,17 @@ class ExtractVASARI:
                 if max(lvol, rvol) > 0:
                     asymmetrical_ventricles = 1
 
-        enlarged_ventricles = 1 if (lvol > enlarge_thresh or rvol > enlarge_thresh) else 0
+        # enlarged_ventricles = 1 if (lvol > enlarge_thresh or rvol > enlarge_thresh) else 0
+
+        enlarged_ventricles=None
+        if (lvol > enlarge_thresh or rvol > enlarge_thresh):
+            enlarged_ventricles=[]
+            if lvol > enlarge_thresh:
+                enlarged_ventricles.append('Left')
+            if rvol > enlarge_thresh:
+                enlarged_ventricles.append('Right')
+            # if len(enlarged_ventricles)>1:
+            enlarged_ventricles = ' and '.join(enlarged_ventricles)
 
         if getattr(self, "verbose", False):
             logger.debug(f"Left ventricular volume:     {lvol}")
@@ -617,8 +629,12 @@ class ExtractVASARI:
         if merged_anat_tumor:
             if self.verbose: logger.debug("Determining ventricle geometry anomalies")
             lvol, rvol, asymmetrical_ventricles, enlarged_ventricles = self.get_ventricle_geometry_statistics(merged_anatseg_array=merged_anat_tumor.array, side=side)
-
-        
+            effaced_ventricles = None
+            if asymmetrical_ventricles:
+                if lvol < rvol:
+                    effaced_ventricles='Left'
+                if rvol < lvol:
+                    effaced_ventricles='Right'        
 
         if self.verbose: logger.debug("Converting raw values to VASARI dictionary features")
         result = pd.DataFrame(columns=self.COL_NAMES)
@@ -652,6 +668,7 @@ class ExtractVASARI:
             "Multiple satellites present": num_components_cet_f,
             #    'F25 Calvarial modelling':np.nan, #unsupported in current version
             "Asymmetrical Ventricles": asymmetrical_ventricles,
+            "Effaced Ventricle": effaced_ventricles,
             "Enlarged Ventricles": enlarged_ventricles,
             "Region Proportions": region_prop_list,
             "Lesion Sizes APxTVxCC (cm)": lesion_sizes,
@@ -660,7 +677,9 @@ class ExtractVASARI:
             "ET Volume (mL)": float(et_vol_ml),
             "Total tumor volume (mL)":float(global_vol_ml),
             "Number of lesions":len(lesion_sizes), 
-            "Ventricle Volumes (mm^3) [L/R]": [lvol, rvol], 
+            "Left Ventricle Volume (mm^3)": lvol, 
+            "Right Ventricle Volume (mm^3)": rvol, 
+
         }
 
         end_time = time.time()
@@ -681,7 +700,7 @@ class ExtractVASARI:
             "Deep WM invasion",
             "CET Crosses midline",
             "Asymmetrical Ventricles",
-            "Enlarged Ventricles",
+            # "Enlarged Ventricles",
             # "Number of lesions",
             # "Multiple satellites present",
             # "Thickness of enhancing margin"

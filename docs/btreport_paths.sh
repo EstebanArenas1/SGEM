@@ -8,13 +8,26 @@
 
 
 # Singularity / Apptainer images
-export SYNTHMORPH_SIF=/gscratch/scrubbed/juampablo/synthmorph_4.sif
-export SYNTHSEG_SIF=/gscratch/scrubbed/juampablo/synthseg.sif
-export OLLAMA_SIF=/gscratch/scrubbed/juampablo/ollama.sif
+export SYNTHMORPH_SIF=/mmfs1/gscratch/scrubbed/juampablo/synthmorph_4.sif
+export SYNTHSEG_SIF=/mmfs1/gscratch/scrubbed/juampablo/synthseg.sif
+export OLLAMA_SIF=/mmfs1/gscratch/scrubbed/juampablo/ollama.sif
+
+export SUBJECTS_DIR=/mmfs1 # Relative directory from which subject files are referenced inside containers. Usually I set this to the root of my scratch space.
 
 # Ollama model storage (should be on large-capacity storage)
-export OLLAMA_MODELS=/gscratch/scrubbed/juampablo/ollama_models
+export OLLAMA_MODELS=/mmfs1/gscratch/scrubbed/juampablo/ollama_models
+export OLLAMA_HOST='http://127.0.0.1:11434'
+unset http_proxy https_proxy all_proxy
+unset HTTP_PROXY HTTPS_PROXY ALL_PROXY
 
+
+if [ ! -x "$SYNTHMORPH_SIF" ]; then
+    chmod +x "$SYNTHMORPH_SIF"
+fi
+
+# if [ ! -x "$SYNTHSEG_SIF" ]; then
+#     chmod +x "$SYNTHSEG_SIF"
+# fi
 
 
 for var in SYNTHMORPH_SIF SYNTHSEG_SIF OLLAMA_SIF; do
@@ -24,13 +37,18 @@ for var in SYNTHMORPH_SIF SYNTHSEG_SIF OLLAMA_SIF; do
     fi
 done
 
-if [ ! -d "$OLLAMA_MODELS" ]; then
-    echo "ERROR: OLLAMA_MODELS does not exist or is not a directory: $OLLAMA_MODELS" >&2
-    return 1
-fi
+for var in SUBJECTS_DIR OLLAMA_MODELS; do
+    if [ ! -d "${!var}" ]; then
+        echo "ERROR: $var does not exist or is not a directory: ${!var}" >&2
+        return 1
+    fi
+done
+
 
 echo "BTReport paths validated:"
 echo "  SYNTHMORPH_SIF : $SYNTHMORPH_SIF"
 echo "  SYNTHSEG_SIF  : $SYNTHSEG_SIF"
 echo "  OLLAMA_SIF    : $OLLAMA_SIF"
 echo "  OLLAMA_MODELS : $OLLAMA_MODELS"
+echo "  SUBJECTS_DIR  : $SUBJECTS_DIR"
+echo "  OLLAMA_HOST   : $OLLAMA_HOST"

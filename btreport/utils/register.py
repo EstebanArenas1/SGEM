@@ -1,11 +1,11 @@
 import csv, sys, os, math, subprocess, datetime, argparse, logging
-
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 
-MNI152 = "btreport/utils/MNI152_T1_1mm_Brain.nii.gz"
-MIDLINE = "btreport/utils/midline_plane_regressed.nii.gz"
+MNI152 = Path(__file__).resolve().parent / "MNI152_T1_1mm_Brain.nii.gz"
+MIDLINE = Path(__file__).resolve().parent / "midline_plane_regressed.nii.gz"
 
 SUBJECTS_DIR = os.environ.get("SUBJECTS_DIR")
 if SUBJECTS_DIR is None:
@@ -13,6 +13,7 @@ if SUBJECTS_DIR is None:
     SUBJECTS_DIR = os.getcwd()
     os.environ["SUBJECTS_DIR"] = SUBJECTS_DIR
 
+# raise ValueError(Path(__file__).resolve().parent.parent)
 
 WRAPPER = os.environ.get("SYNTHMORPH_SIF")
 if WRAPPER is None:
@@ -21,6 +22,9 @@ if WRAPPER is None:
 
 def run_registration(moving, fixed, moved, transform, wrapper=WRAPPER, subjects_dir=SUBJECTS_DIR):
     """Run SynthMorph registration for one subject."""
+    env = os.environ.copy()
+    env["SUBJECTS_DIR"] = subjects_dir
+
     logger.info(f"========================================")
     logger.info(f"    SynthMorph Registration")
     logger.info(f"----------------------------------------")
@@ -31,7 +35,7 @@ def run_registration(moving, fixed, moved, transform, wrapper=WRAPPER, subjects_
     logger.info(f"========================================")
 
     cmd = [wrapper, "register", "-g", "-o", moved, "-t", transform, moving, fixed]
-    subprocess.run(cmd, check=True)
+    subprocess.run(cmd, check=True, env=env)
 
 
 def run_apply(transform, moving, moved, wrapper, subjects_dir, is_seg=False):

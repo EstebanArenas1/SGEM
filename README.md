@@ -76,7 +76,7 @@ See [INSTALL.md](docs/INSTALL.md) for full installation instructions on HPC syst
   ```
   This will set the paths as environment variables and validate that each provided path points to a file/dir. 
 
-* On a GPU allocation, start the Ollama server in the background (e.g., using tmux), then detach.
+* On a GPU allocation, start the Ollama server in the background (e.g., within a detached [tmux](https://hamvocke.com/blog/a-quick-and-easy-guide-to-tmux/) session).
   ```bash
   tmux new -t ollama
   python3 -m btreport.ollama_server start-ollama --gpus 0,1

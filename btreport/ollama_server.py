@@ -4,13 +4,15 @@ import subprocess
 from pathlib import Path
 
 
-ENV='OLLAMA_HOST=http://127.0.0.1:50505'
+# ENV='OLLAMA_HOST=http://127.0.0.1:50505'
 
 def check_env_variables():
     if "OLLAMA_SIF" not in os.environ:
         raise RuntimeError("Set OLLAMA_SIF. Syntax: export OLLAMA_SIF=/path/to/ollama.sif")
     if "OLLAMA_MODELS" not in os.environ:
         raise RuntimeError("Set OLLAMA_MODELS. Syntax: export OLLAMA_MODELS=/path/to/ollama_models ")
+    if "OLLAMA_HOST" not in os.environ:
+        raise RuntimeError("Set OLLAMA_HOST. Syntax: export OLLAMA_HOST=http://127.0.0.1:50505")
 
 def start_ollama(gpus="0"):
     check_env_variables()
@@ -24,8 +26,10 @@ def start_ollama(gpus="0"):
     subprocess.run(
         [
             "apptainer", "exec", "--nv",
-            "--env", ENV,
-            "-B", f"{Path(models).parent}:{Path(models).parent}",
+            "--env", f"OLLAMA_HOST={os.environ['OLLAMA_HOST']}",
+            # "--env", ENV,
+            # "-B", f"{Path(models).parent}:{Path(models).parent}",
+            "-B", f"{Path(models)}:{Path(models)}",
             sif,
             "ollama", "serve",
         ],
@@ -35,7 +39,8 @@ def start_ollama(gpus="0"):
 def check_ollama_server():
     "Check if Ollama server is running."
     try:
-        _, host = ENV.split("=", 1)
+        # _, host = ENV.split("=", 1)
+        host=os.environ["OLLAMA_HOST"]
         subprocess.run(
             ["curl", "--noproxy", "*", "-sf", f"{host}/api/tags"],
             stdout=subprocess.DEVNULL,
@@ -57,8 +62,10 @@ def pull_llm(model):
 
     subprocess.run([
         "apptainer", "exec",
-        "--env", ENV,
-        "-B", f"{Path(models).parent}:{Path(models).parent}",
+        "--env", f"OLLAMA_HOST={os.environ['OLLAMA_HOST']}",
+        # "--env", ENV,
+        # "-B", f"{Path(models).parent}:{Path(models).parent}",
+        "-B", f"{Path(models)}:{Path(models)}",
         sif, "ollama", "pull", model
     ], check=True, env=env)
 

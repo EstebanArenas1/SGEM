@@ -130,8 +130,9 @@ def main(args: argparse.Namespace):
         "Proportion Enhancing",
         "Proportion Necrosis",
         "Proportion of Oedema",
+        "Effaced Ventricle",
         "Lesion Sizes APxTVxCC (cm)",
-        "Region Proportions",
+        # "Region Proportions",
         "level_max_shift",
         "max_shift_mm",
         "midline_shift_present",
@@ -164,7 +165,7 @@ if __name__ == "__main__":
     parser.add_argument("--overwrite", action="store_true", help="Redo this step, overwriting previous results.")
     parser.add_argument("--ncr_label", type=int, default=1)
     parser.add_argument("--ed_label", type=int, default=2)
-    parser.add_argument("--et_label", type=int, default=4)
+    parser.add_argument("--et_label", type=int, default=3)
     parser.add_argument("--devices", type=str, default='0', help="String with cuda device IDs for use by synthseg and SynthMorph. E.g. '0,1' or '0'.")
 
     parser.add_argument("--image", action="store_true", help="Indicator as to whther the model will use images for generation. Will look for tumor_maxslice.png in subject_folder")
@@ -180,6 +181,3 @@ if __name__ == "__main__":
 
     main(args)
 
-
-### TODO: Fix edema volume etc, tune prompt, tune metadata that is used for prompting.
-###       - Make --synthseg --merged args so I can just load in precalculated segs
