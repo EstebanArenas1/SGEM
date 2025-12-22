@@ -46,16 +46,20 @@ The framework consists of four components:
 
 
 ## Installation (~1.5 hours)
+
+Installation is divided into three steps:
+  1. Downloading all accompanying Singularity images
+  2. Setting up Ollama and downloading the LLMs used for inference and evaluation
+  3. Creating a conda environment
+     
 See [INSTALL.md](docs/INSTALL.md) for full installation instructions on HPC systems. 
-
-
 ![-----------------------------------------------------](assets/purpleline.png)
 
 ## Usage
 
 
 ### 1. Dataset formatting
-  BTReport requires each subject's data be separated into individual folders. Each subject folder should include at least two niftii files: a T1 scan with file ending `-t1n.nii.gz` , and the corresponding tumor segmentation mask with file ending `-seg.nii.gz`. Following BraTS convention, segmentations should contain NCR, ED, and ET subregions.  Optionally an additional file with additional patient metadata can be added in a file as `metadata.json`. 
+  BTReport requires each subject's data be separated into individual folders. Each subject folder should include at least two niftii files: a T1 scan with file ending `-t1n.nii.gz` , and the corresponding tumor segmentation mask with file ending `-seg.nii.gz`. Following BraTS convention, segmentations should contain NCR, ED, and ET subregions.  Optionally, an additional metadata.json file may be provided containing the ground-truth Findings section and/or supplementary patient metadata. When included, the ground-truth Findings section should be stored under the 'Clinical Report' key.
   ```text
   data/
   ├── subject_001/
