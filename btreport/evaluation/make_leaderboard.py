@@ -7,20 +7,33 @@ from RadEval import RadEval, compare_systems
 
 
 EVAL_JSONS = {
-    'BTReport (gpt-oss-120b)': '/pscratch/sd/j/jehr/MSFT/BTReport/data/example/merged_reports_btreport_eval_results_details.json',
-    'BTReport (llama3-70b)': '/pscratch/sd/j/jehr/MSFT/BTReport/data/example/merged_reports_btreport_llama3_70b_eval_results_details.json',
-
-    'AutoRG-Brain': "/pscratch/sd/j/jehr/MSFT/BTReport_evaluation/AutoRG_Brain_weights/autorg_reports_uwimaging_eval_results_details.json",
-    'seg2exp': "/pscratch/sd/j/jehr/MSFT/BTReport_evaluation/from-segmentation-to-explanation/saved/seg2exp_reports_uwimaging_eval_results_details.json",
+    "BTReport (gpt-oss-120b)": "/pscratch/sd/j/jehr/MSFT/BTReport/data/example/merged_reports_btreport_eval_results_details.json",
+    "BTReport (llama3-70b)": "/pscratch/sd/j/jehr/MSFT/BTReport/data/example/merged_reports_btreport_llama3_70b_eval_results_details.json",
+    "AutoRG-Brain": "/pscratch/sd/j/jehr/MSFT/BTReport_evaluation/AutoRG_Brain_weights/autorg_reports_uwimaging_eval_results_details.json",
+    "seg2exp": "/pscratch/sd/j/jehr/MSFT/BTReport_evaluation/from-segmentation-to-explanation/saved/seg2exp_reports_uwimaging_eval_results_details.json",
 }
 
 REPORT_JSONS_DICT = {
-    'BTReport (gpt-oss-120b)':{'path':'/pscratch/sd/j/jehr/MSFT/BTReport/data/example/merged_reports_btreport.json', 'parse_real': True, 'parse_synthetic':True,},
-    'BTReport (llama3-70b)':{'path':'/pscratch/sd/j/jehr/MSFT/BTReport/data/example/merged_reports_btreport_llama3_70b.json', 'parse_real': True, 'parse_synthetic':True,},
-
-    'AutoRG-Brain':{'path': '/pscratch/sd/j/jehr/MSFT/BTReport_evaluation/AutoRG_Brain_weights/autorg_reports_uwimaging.json', 'parse_real': True, 'parse_synthetic':False,},
-    'seg2exp':{'path': '/pscratch/sd/j/jehr/MSFT/BTReport_evaluation/from-segmentation-to-explanation/saved/seg2exp_reports_uwimaging.json', 'parse_real': True, 'parse_synthetic':False,}
-
+    "BTReport (gpt-oss-120b)": {
+        "path": "/pscratch/sd/j/jehr/MSFT/BTReport/data/example/merged_reports_btreport.json",
+        "parse_real": True,
+        "parse_synthetic": True,
+    },
+    "BTReport (llama3-70b)": {
+        "path": "/pscratch/sd/j/jehr/MSFT/BTReport/data/example/merged_reports_btreport_llama3_70b.json",
+        "parse_real": True,
+        "parse_synthetic": True,
+    },
+    "AutoRG-Brain": {
+        "path": "/pscratch/sd/j/jehr/MSFT/BTReport_evaluation/AutoRG_Brain_weights/autorg_reports_uwimaging.json",
+        "parse_real": True,
+        "parse_synthetic": False,
+    },
+    "seg2exp": {
+        "path": "/pscratch/sd/j/jehr/MSFT/BTReport_evaluation/from-segmentation-to-explanation/saved/seg2exp_reports_uwimaging.json",
+        "parse_real": True,
+        "parse_synthetic": False,
+    },
 }
 
 
@@ -31,21 +44,21 @@ def significance_test(systems, references):
     ratescore_evaluator = RadEval(do_ratescore=True)
 
     eval_functions = {
-    'bleu': lambda hyps, refs: bleu_evaluator(refs, hyps)['bleu'],
-    'rouge1': lambda hyps, refs: rouge_evaluator(refs, hyps)['rouge1'],
-    'rouge2': lambda hyps, refs: rouge_evaluator(refs, hyps)['rouge2'],
-    'rougeL': lambda hyps, refs: rouge_evaluator(refs, hyps)['rougeL'],
-    'bertscore': lambda hyps, refs: bertscore_evaluator(refs, hyps)['bertscore'],
-    'ratescore': lambda hyps, refs: ratescore_evaluator(refs, hyps)['ratescore'],
+        "bleu": lambda hyps, refs: bleu_evaluator(refs, hyps)["bleu"],
+        "rouge1": lambda hyps, refs: rouge_evaluator(refs, hyps)["rouge1"],
+        "rouge2": lambda hyps, refs: rouge_evaluator(refs, hyps)["rouge2"],
+        "rougeL": lambda hyps, refs: rouge_evaluator(refs, hyps)["rougeL"],
+        "bertscore": lambda hyps, refs: bertscore_evaluator(refs, hyps)["bertscore"],
+        "ratescore": lambda hyps, refs: ratescore_evaluator(refs, hyps)["ratescore"],
     }
 
     signatures, scores = compare_systems(
         systems=systems,
         metrics=eval_functions,
         references=references,
-        n_samples=50,                    # Number of randomization samples
-        significance_level=0.05,         # Alpha level for significance testing
-        print_results=True              # Print formatted results table
+        n_samples=50,  # Number of randomization samples
+        significance_level=0.05,  # Alpha level for significance testing
+        print_results=True,  # Print formatted results table
     )
     return signatures, scores
 
@@ -61,40 +74,32 @@ def process_eval_json(json_path):
         subject_id, metrics = next(iter(entry.items()))
 
         bleu = metrics.get("bleu", {}).get("bleu", {})
-        rouge = metrics.get('rouge1', {}).get('rouge', {})
-        bertscore = metrics.get('bertscore', {}).get('bertscore', {})
-        ratescore = metrics.get('ratescore', {}).get('ratescore', {})
+        rouge = metrics.get("rouge1", {}).get("rouge", {})
+        bertscore = metrics.get("bertscore", {}).get("bertscore", {})
+        ratescore = metrics.get("ratescore", {}).get("ratescore", {})
 
         tbfact_deepseek = metrics.get("tbfact (deepseek-r1:70b)", {})
 
-
-        rows.append({
-            "subject_id": subject_id,
-            "bleu_1": bleu.get("bleu_1"),
-            "bleu_2": bleu.get("bleu_2"),
-            "bleu_3": bleu.get("bleu_3"),
-            "bleu_4": bleu.get("bleu_4"),
-
-            "rouge_1": rouge.get('rouge1').get('mean_score'),
-            "rouge_2": rouge.get('rouge2').get('mean_score'),
-            "rouge_L": rouge.get('rougeL').get('f1-score'),
-
-            "bertscore": bertscore.get('mean_score'),
-            "ratescore": ratescore.get('f1-score'),
-
-            
-            "tbfact_deepseek": tbfact_deepseek.get('score'),
-            "tbfact_deepseek_precision": tbfact_deepseek.get('details', {}).get('metrics', {}).get('precision'),
-            "tbfact_deepseek_recall": tbfact_deepseek.get('details', {}).get('metrics', {}).get('recall'),
-            "tbfact_deepseek_f1": tbfact_deepseek.get('details', {}).get('metrics', {}).get('f1'),
-
-
-        })
+        rows.append(
+            {
+                "subject_id": subject_id,
+                "bleu_1": bleu.get("bleu_1"),
+                "bleu_2": bleu.get("bleu_2"),
+                "bleu_3": bleu.get("bleu_3"),
+                "bleu_4": bleu.get("bleu_4"),
+                "rouge_1": rouge.get("rouge1").get("mean_score"),
+                "rouge_2": rouge.get("rouge2").get("mean_score"),
+                "rouge_L": rouge.get("rougeL").get("f1-score"),
+                "bertscore": bertscore.get("mean_score"),
+                "ratescore": ratescore.get("f1-score"),
+                "tbfact_deepseek": tbfact_deepseek.get("score"),
+                "tbfact_deepseek_precision": tbfact_deepseek.get("details", {}).get("metrics", {}).get("precision"),
+                "tbfact_deepseek_recall": tbfact_deepseek.get("details", {}).get("metrics", {}).get("recall"),
+                "tbfact_deepseek_f1": tbfact_deepseek.get("details", {}).get("metrics", {}).get("f1"),
+            }
+        )
 
     return pd.DataFrame(rows)
-
-
-
 
 
 def print_eval_metrics(eval_jsons_dict=EVAL_JSONS):
@@ -104,7 +109,7 @@ def print_eval_metrics(eval_jsons_dict=EVAL_JSONS):
 
         numeric_df = eval_df.drop(columns=["subject_id"], errors="ignore")
         numeric_df = numeric_df.select_dtypes(include="number")
-        mean_metrics_df =  numeric_df.mean().to_dict()
+        mean_metrics_df = numeric_df.mean().to_dict()
 
         results_summary[name] = mean_metrics_df
 
@@ -114,7 +119,7 @@ def print_eval_metrics(eval_jsons_dict=EVAL_JSONS):
 def print_significance_tests(REPORT_JSONS_DICT):
     """
     REPORT_JSONS_DICT: dict { model_name: path_to_json }
-    
+
     Returns:
         systems: dict of model_name -> list of predicted reports
         references: list of clinical (ground truth) reports
@@ -123,7 +128,7 @@ def print_significance_tests(REPORT_JSONS_DICT):
     # Load all JSON files
     model_data = {}
     for model, report in REPORT_JSONS_DICT.items():
-        with open(report['path'], "r") as f:
+        with open(report["path"], "r") as f:
             model_data[model] = json.load(f)
 
     # Find subject IDs that are present in ALL models
@@ -140,14 +145,21 @@ def print_significance_tests(REPORT_JSONS_DICT):
     for sid in common_subjects:
         # Reference: same for all models → from any model
         model_ = next(iter(REPORT_JSONS_DICT))
-        
+
         conf = REPORT_JSONS_DICT[model_]
         subdict = model_data[model_][sid]
 
         ref = subdict["Clinical Report"]
         if conf["parse_real"]:
             real_reports = parse_radiology_report(ref)
-            ref = " ".join(f"{k}:\n{real_reports[k]}" for k in ['BRAIN', 'MASS EFFECT & VENTRICLES',] if k in real_reports)
+            ref = " ".join(
+                f"{k}:\n{real_reports[k]}"
+                for k in [
+                    "BRAIN",
+                    "MASS EFFECT & VENTRICLES",
+                ]
+                if k in real_reports
+            )
 
         references.append(ref)
 
@@ -159,7 +171,14 @@ def print_significance_tests(REPORT_JSONS_DICT):
 
             if conf["parse_synthetic"]:
                 synthetic_reports = parse_radiology_report(pred)
-                pred = "\n\n".join(f"{k}:\n{synthetic_reports[k]}" for k in ['BRAIN', 'MASS EFFECT & VENTRICLES',] if k in synthetic_reports)
+                pred = "\n\n".join(
+                    f"{k}:\n{synthetic_reports[k]}"
+                    for k in [
+                        "BRAIN",
+                        "MASS EFFECT & VENTRICLES",
+                    ]
+                    if k in synthetic_reports
+                )
 
             systems[model].append(pred)
 
@@ -178,9 +197,10 @@ def print_significance_tests(REPORT_JSONS_DICT):
 
     significance_test(systems, references)
 
+
 # TODO: add parsing foloowing REPORT_JSONS_DICT
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print_eval_metrics()
     # print_significance_tests(REPORT_JSONS_DICT)

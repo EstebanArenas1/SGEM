@@ -3,12 +3,12 @@ from .utils.log import get_logger
 from .llm_report_generation.ollama_report_gen import generate_llm_report
 from .midline_shift.midline_shift3d import midline_shift_3d
 from .vasari_features import ExtractVASARI
+
 # from .vasari_features.extract_vasari_features import vasari_features
 
 import os, shutil, glob, json
 import argparse
 from os.path import join
-
 
 """
 conda activate BTReport
@@ -19,6 +19,7 @@ python3 -m btreport.generate_report --subject_folder $SF --llm llama3:70b
 
 python3 -m btreport.eval_json --skip_processed --no-parse-synthetic --do_details --json /pscratch/sd/j/jehr/MSFT/BTReport/data/example/merged_reports_btreport_llama3_70b.json
 """
+
 
 # python3 -m btreport.eval_json --skip_processed --no-parse-synthetic --do_details --json /pscratch/sd/j/jehr/MSFT/BTReport_evaluation/from-segmentation-to-explanation/savedv1/seg2exp_reports_uwimaging_22513869714470.json
 def main(args: argparse.Namespace):
@@ -38,13 +39,12 @@ def main(args: argparse.Namespace):
         with open(metadata_json_pth, "r") as f:
             metadata = json.load(f)
 
-
     # Load in previous report if it exists
     report_save_path = join(args.subject_folder, "patient_metadata_btreport.json")
     if os.path.exists(report_save_path):
         with open(report_save_path, "r") as f:
             existing_report = json.load(f)
-        logger.info(f'Found previously generated metadata, loading this..')
+        logger.info(f"Found previously generated metadata, loading this..")
         metadata = {**existing_report, **metadata}
 
     # Register atlas to image, image to atlas, and midline
@@ -58,20 +58,15 @@ def main(args: argparse.Namespace):
 
     midline_out = join(tmp_dir, "patient_midline.nii.gz")
 
-    logger.info(f'** [0/4] Starting registration steps...')
-    register.register_mni_to_subject(
-        fixed=t1_path, moved=mni_in_subj, transform=mni_tfm, overwrite=args.overwrite
-    )  # register MNI152 to subject space
+    logger.info(f"** [0/4] Starting registration steps...")
+    register.register_mni_to_subject(fixed=t1_path, moved=mni_in_subj, transform=mni_tfm, overwrite=args.overwrite)  # register MNI152 to subject space
     register.register_to_mni(moving=t1_path, moved=sub_in_mni, transform=sub_tfm, overwrite=args.overwrite)  # register T1 to MNI152 space
-    register.register_midline_to_subject(
-        moved=midline_out, transform=mni_tfm, overwrite=args.overwrite
-    )  # register MNI152 midline to subject space using mni_tfm
+    register.register_midline_to_subject(moved=midline_out, transform=mni_tfm, overwrite=args.overwrite)  # register MNI152 midline to subject space using mni_tfm
     register.apply_transform(moving=tumor_path, moved=tum_in_mni, transform=sub_tfm, is_seg=True)
-    logger.info(f'* Finished registration steps!')
-
+    logger.info(f"* Finished registration steps!")
 
     # SynthSeg is unreliable on images with tumors, so we run it on the (healthy) MNI atlas registered to the subject space
-    logger.info(f'** [1/4] Starting anatomical segmentation steps...')
+    logger.info(f"** [1/4] Starting anatomical segmentation steps...")
     anatseg = mni_in_subj.replace(".nii.gz", "_synthseg.nii.gz")
     merged_seg = mni_in_subj.replace(".nii.gz", "_merged_seg.nii.gz")
     anat_segmentation.synthseg(input_path=mni_in_subj, output_path=anatseg)
@@ -85,26 +80,27 @@ def main(args: argparse.Namespace):
         ncr_label=args.ncr_label,
         ed_label=args.ed_label,
         et_label=args.et_label,
-        tumor_type=metadata.get('tumor-type', 'glioma'),
+        tumor_type=metadata.get("tumor-type", "glioma"),
         overwrite=args.overwrite,
     )
-    metadata.update({'Anatomical Overlap Regions': overlap_regions})
+    metadata.update({"Anatomical Overlap Regions": overlap_regions})
 
-    logger.info(f'* Finished segmentation steps! Merged mask can be found in {merged_seg}')
-
+    logger.info(f"* Finished segmentation steps! Merged mask can be found in {merged_seg}")
 
     # Extract midline shift features
+    logger.info(f"** [2/4] Starting midline shift processing...")
     midline_summary = midline_shift_3d(tmp_dir=tmp_dir, tumor=tumor_path, ncr_label=args.ncr_label, ed_label=args.ed_label, et_label=args.et_label, overwrite=args.overwrite)
     metadata.update(midline_summary)
 
     # Extract VASARI features
     # vasari_summary = vasari_features(tumor=tumor_path, tumor_mni=tum_in_mni, metadata=metadata, merged=merged_seg, verbose=False, ncr_label=args.ncr_label, ed_label=args.ed_label, et_label=args.et_label)
+    logger.info(f"** [3/4] Starting VASARI feature extraction steps...")
     extractor = ExtractVASARI(enhancing_label=args.et_label, nonenhancing_label=args.ncr_label, oedema_label=args.ed_label, verbose=False)
-    vasari_summary = extractor(tumorseg_mni=tum_in_mni, tumorseg_ss=tumor_path, merged=merged_seg, metadata=metadata) 
+    vasari_summary = extractor(tumorseg_mni=tum_in_mni, tumorseg_ss=tumor_path, merged=merged_seg, metadata=metadata)
     metadata.update(vasari_summary)
 
-    logger.info(f'** [4/4] Starting report generation with LLM ({args.llm})...')
-    metadata_no_clinical={k: v for k, v in metadata.items() if k != "Clinical Report"}
+    logger.info(f"** [4/4] Starting report generation with LLM ({args.llm})...")
+    metadata_no_clinical = {k: v for k, v in metadata.items() if k != "Clinical Report"}
 
     keys_to_keep = [
         "Anatomical Overlap Regions",
@@ -136,15 +132,15 @@ def main(args: argparse.Namespace):
         "level_max_shift",
         "max_shift_mm",
         "midline_shift_present",
-        "Text Report"
+        "Text Report",
     ]
     refined_metadata = {k: v for k, v in metadata_no_clinical.items() if k in keys_to_keep}
 
-    if f'BTReport Generated Report ({args.llm})' not in metadata:
-        args.image_path = join(args.subject_folder, 'tumor_maxslice.png') if args.image else None
-        report = generate_llm_report(args.subject_folder.split('/')[-1], refined_metadata, model=args.llm, image_path=args.image_path)
-        logger.info(f'* Finished LLM report generation using extracted metadata!')
-        metadata[f'BTReport Generated Report ({args.llm})'] = report
+    if f"BTReport Generated Report ({args.llm})" not in metadata:
+        args.image_path = join(args.subject_folder, "tumor_maxslice.png") if args.image else None
+        report = generate_llm_report(args.subject_folder.split("/")[-1], refined_metadata, model=args.llm, image_path=args.image_path)
+        logger.info(f"* Finished LLM report generation using extracted metadata!")
+        metadata[f"BTReport Generated Report ({args.llm})"] = report
     else:
         logger.info(f'Key "BTReport Generated Report ({args.llm})" found in metadata, skipping LLM report')
 
@@ -152,7 +148,7 @@ def main(args: argparse.Namespace):
         json.dump(metadata, f, indent=2)
     logger.info(f'Saved extracted metadata and LLM report to {join(args.subject_folder, "patient_metadata_btreport.json")}')
 
-    if args.clear_tmp: # Delete intermediate files after processing, useful for memory reduction but you lose interpretability of results.
+    if args.clear_tmp:  # Delete intermediate files after processing, useful for memory reduction but you lose interpretability of results.
         shutil.rmtree(tmp_dir)
 
 
@@ -166,18 +162,21 @@ if __name__ == "__main__":
     parser.add_argument("--ncr_label", type=int, default=1)
     parser.add_argument("--ed_label", type=int, default=2)
     parser.add_argument("--et_label", type=int, default=3)
-    parser.add_argument("--devices", type=str, default='0', help="String with cuda device IDs for use by synthseg and SynthMorph. E.g. '0,1' or '0'.")
+    parser.add_argument("--devices", type=str, default="0", help="String with cuda device IDs for use by synthseg and SynthMorph. E.g. '0,1' or '0'.")
 
-    parser.add_argument("--image", action="store_true", help="Indicator as to whther the model will use images for generation. Will look for tumor_maxslice.png in subject_folder")
+    parser.add_argument(
+        "--image",
+        action="store_true",
+        help="Indicator as to whther the model will use images for generation. Will look for tumor_maxslice.png in subject_folder",
+    )
     parser.add_argument("--llm", type=str, default="gpt-oss:120b")
-
 
     args = parser.parse_args()
 
     subject = os.path.basename(os.path.normpath(args.subject_folder))
-    logger = get_logger(subject) 
+    logger = get_logger(subject)
+    # logger = get_logger("btreport.subject", subject=subject)
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.devices)
     logger.info(f"Using GPUs: CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']}")
 
     main(args)
-

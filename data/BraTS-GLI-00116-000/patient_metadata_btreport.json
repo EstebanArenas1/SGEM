@@ -25,11 +25,11 @@
     },
     "et": {
       "left": 0,
-      "right": 47121
+      "right": 0
     },
     "ncr_et": {
       "left": 0,
-      "right": 57438
+      "right": 10317
     }
   },
   "crosses_ideal_midline": {
@@ -41,7 +41,7 @@
   "primary_side_ideal_midline": {
     "ncr": "right",
     "ed": "right",
-    "et": "right",
+    "et": "left",
     "ncr_et": "right"
   },
   "volumes_patient_midline": {
@@ -55,17 +55,17 @@
     },
     "et": {
       "left": 0,
-      "right": 38298
+      "right": 0
     },
     "ncr_et": {
       "left": 0,
-      "right": 46669
+      "right": 8371
     }
   },
   "primary_side_patient_midline": {
     "ncr": "right",
     "ed": "right",
-    "et": "right",
+    "et": "left",
     "ncr_et": "right"
   },
   "crosses_patient_midline": {
@@ -80,51 +80,73 @@
   "Cortical involvement": "Present",
   "Deep WM invasion": "Present",
   "ED Volume (mL)": 110.483,
-  "ET Volume (mL)": 47.121,
+  "ET Volume (mL)": 0.0,
   "Edema crosses midline": "False",
   "Effaced Ventricle": "Right",
   "Eloquent Brain Involvement": "Vision",
-  "Enhancement Quality": "Marked",
+  "Enhancement Quality": "None",
   "Enlarged Ventricles": "Left",
   "Ependymal (ventricular) Invasion": "Present",
   "Left Ventricle Volume (mm^3)": 32024.0,
   "Lesion Sizes APxTVxCC (cm)": [
     [
-      7.1,
-      4.9,
-      5.9
+      5.9,
+      3.3,
+      4.7
+    ],
+    [
+      0.7,
+      0.6,
+      0.5
+    ],
+    [
+      0.9,
+      1.0,
+      1.2
+    ],
+    [
+      0.8,
+      0.9,
+      0.6
+    ],
+    [
+      0.5,
+      0.5,
+      0.5
     ]
   ],
-  "Multifocal or Multicentric": "Solitary",
-  "Multiple satellites present": "Present",
+  "Multifocal or Multicentric": "Multifocal",
+  "Multiple satellites present": "Absent",
   "NCR Volume (mL)": 10.317,
-  "Number of lesions": 1,
-  "Proportion Enhancing": 28.06,
+  "Number of lesions": 5,
+  "Proportion Enhancing": 0.0,
   "Proportion Necrosis": 6.14,
   "Proportion of Oedema": 65.79,
   "Region Proportions": [
     [
       "cortex",
-      0.4959588940901112
+      0.18695718106371834
     ],
     [
       "parietal",
-      0.46968256290228205
+      0.17705202790261657
     ],
     [
       "occipital",
-      0.3207102106495026
+      0.12089525490087955
     ],
     [
       "temporal",
-      0.28099400234055005
+      0.10592379166781549
     ]
   ],
   "Right Ventricle Volume (mm^3)": 10479.0,
   "Side of Tumor Epicenter": "Right",
-  "Text Report": "Cortex, parietal, occipital and temporal lobes, right, mostly enhancing, solitary, ependymal invasion present, deep white matter invasion present, enhancing region does not cross midline, tumor-side ventricular asymmetry.",
-  "Thickness of enhancing margin": ">3mm",
+  "Text Report": "Cortex, parietal, occipital and temporal lobes, right, nonenhancing, multifocal, ependymal invasion present, deep white matter invasion present, enhancing region does not cross midline, tumor-side ventricular asymmetry.",
+  "Thickness of enhancing margin": "<3mm",
   "Total tumor volume (mL)": 167.921,
   "Tumor Location": "cortex, parietal, occipital and temporal lobes",
-  "BTReport Generated Report (gpt-oss:120b)": "**FINDINGS**\n\n**MASS EFFECT & VENTRICLES:**  \nThere is an approximately 10 mm leftward midline shift at the level of the fourth ventricle. The right lateral ventricle, including the inferior horn, is effaced by tumor, whereas the left lateral ventricle is enlarged, producing marked ventricular asymmetry. No tonsillar herniation is seen and the basal cisterns remain patent.\n\n**BRAIN/ENHANCEMENT:**  \nA solitary, markedly enhancing lesion centered in the right cortex involving the parietal, occipital and temporal lobes measures 7.1 x 4.9 x 5.9 cm (AP x TV x CC). The enhancing rim is thick (>3 mm). The lesion demonstrates ependymal invasion of the right lateral ventricle and extends into deep structures on the right-including the thalamus, caudate, putamen, pallidum, and hippocampus-as well as deep white-matter infiltration. Multiple small enhancing satellite nodules are present adjacent to the main mass. Approximately 6 % of the lesion is non-enhancing necrotic tissue. A large surrounding FLAIR-hyperintense region, consistent with vasogenic edema, comprises the majority of the lesion volume (66 %) but does not cross the midline. The enhancing component remains confined to the right side and does not cross the midline."
+  "BTReport Generated Report (gpt-oss:120b)": "**FINDINGS**\n\n**MASS EFFECT & VENTRICLES:**  \nThere is an approximately 10 mm leftward midline shift at the level of the fourth ventricle. The right lateral ventricle, including the inferior horn, is effaced by tumor, whereas the left lateral ventricle is enlarged, producing marked ventricular asymmetry. No tonsillar herniation is seen and the basal cisterns remain patent.\n\n**BRAIN/ENHANCEMENT:**  \nA solitary, markedly enhancing lesion centered in the right cortex involving the parietal, occipital and temporal lobes measures 7.1 x 4.9 x 5.9 cm (AP x TV x CC). The enhancing rim is thick (>3 mm). The lesion demonstrates ependymal invasion of the right lateral ventricle and extends into deep structures on the right-including the thalamus, caudate, putamen, pallidum, and hippocampus-as well as deep white-matter infiltration. Multiple small enhancing satellite nodules are present adjacent to the main mass. Approximately 6 % of the lesion is non-enhancing necrotic tissue. A large surrounding FLAIR-hyperintense region, consistent with vasogenic edema, comprises the majority of the lesion volume (66 %) but does not cross the midline. The enhancing component remains confined to the right side and does not cross the midline.",
+  "Clinical Report": "***Placeholder Report-not real*** MASS EFFECT & VENTRICLES: Cortex, parietal, occipital and temporal lobes, right, nonenhancing, multifocal, ependymal invasion present, deep white matter invasion present, BRAIN: enhancing region does not cross midline, tumor-side ventricular asymmetry.",
+  "BTReport Generated Report (llama3:70b)": "FINDINGS:\n\nMASS EFFECT & VENTRICLES: There is a midline shift of at least 10 mm to the left, with effacement of the right lateral ventricle. The left lateral ventricle is enlarged.\n\nBRAIN: Within the right parietal and occipital lobes, there are multiple non-enhancing lesions, measuring up to 5.9 x 3.3 x 4.7 cm in size. There is cortical involvement and deep white matter invasion. Ependymal invasion is also present. The lesions are surrounded by a large volume of vasogenic edema, which does not cross the midline.\n\nNote: I prioritized the most abnormal and clinically significant findings, focusing on the mass effect, ventricular effacement, lesion size, and extent of invasion. I avoided mentioning measurements or features that were not supported by the metadata."
 }

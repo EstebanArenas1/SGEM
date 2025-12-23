@@ -85,7 +85,6 @@ Write the FINDINGS section now, using clinical radiology language.
 """
 
 
-
 REPORT_TEMPLATE_IMAGE = """
 You are a radiologist generating a synthetic clinical MRI report.
 
@@ -139,8 +138,6 @@ Write the FINDINGS section now, using clinical radiology language.
 """
 
 
-
-
 def generate_llm_report(subject_id, metadata, image_path=None, model="gpt-oss:120b"):
 
     if image_path is None:
@@ -155,13 +152,12 @@ def generate_llm_report(subject_id, metadata, image_path=None, model="gpt-oss:12
             image_path=image_path,
             subject_id=subject_id,
             metadata_json=json.dumps(metadata, indent=2),
-        )     
+        )
 
     response = ollama.chat(
         model=model,
         messages=[{"role": "user", "content": prompt}],
     )
-    report=response["message"]["content"]
-    report = report.replace('\u2011', '-')
-    return sanitize_text(report) 
-
+    report = response["message"]["content"]
+    report = report.replace("\u2011", "-")
+    return sanitize_text(report)

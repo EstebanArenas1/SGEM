@@ -115,13 +115,12 @@ def generate_llm_report(subject_id, metadata, image_path=None, model="gpt-oss:12
             image_path=image_path,
             subject_id=subject_id,
             metadata_json=json.dumps(metadata, indent=2),
-        )     
+        )
 
     response = ollama.chat(
         model=model,
         messages=[{"role": "user", "content": prompt}],
     )
-    report=response["message"]["content"]
-    report = report.replace('\u2011', '-')
-    return sanitize_text(report) 
-
+    report = response["message"]["content"]
+    report = report.replace("\u2011", "-")
+    return sanitize_text(report)

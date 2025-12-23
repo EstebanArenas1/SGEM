@@ -7,10 +7,10 @@ logger = logging.getLogger(__name__)
 MNI152 = Path(__file__).resolve().parent / "MNI152_T1_1mm_Brain.nii.gz"
 MIDLINE = Path(__file__).resolve().parent / "midline_plane_regressed.nii.gz"
 
-SUBJECTS_DIR = os.environ.get("SUBJECTS_DIR")
+SUBJECTS_DIR = os.path.realpath(os.environ.get("SUBJECTS_DIR"))
 if SUBJECTS_DIR is None:
     logger.info("Environment variable SUBJECTS_DIR working dir is not set, defaulting to curent working dir")
-    SUBJECTS_DIR = os.getcwd()
+    SUBJECTS_DIR = os.path.realpath(os.getcwd())
     os.environ["SUBJECTS_DIR"] = SUBJECTS_DIR
 
 # raise ValueError(Path(__file__).resolve().parent.parent)
@@ -92,6 +92,4 @@ if __name__ == "__main__":
     parser.add_argument("--wrapper", default=WRAPPER, required=False)
     parser.add_argument("--subjects_dir", default=SUBJECTS_DIR, required=False)
     args = parser.parse_args()
-    run_registration(
-        moving=args.moving, fixed=args.fixed, moved=args.moved, transform=args.transform, wrapper=args.wrapper, subjects_dir=args.subjects_dir
-    )
+    run_registration(moving=args.moving, fixed=args.fixed, moved=args.moved, transform=args.transform, wrapper=args.wrapper, subjects_dir=args.subjects_dir)

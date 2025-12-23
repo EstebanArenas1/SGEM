@@ -10,13 +10,12 @@ that can be used independently of MedBench's runner system. It extracts
 facts from texts and evaluates their factual consistency.
 
 """
+
 import os
 import json
 import logging
 import re
 from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
-
-
 
 
 class LLMClient(Protocol):
@@ -34,7 +33,6 @@ class LLMClient(Protocol):
             Dictionary containing at least a "content" key with the completion text
         """
         ...
-
 
 
 class TBFactEvaluator:
@@ -138,13 +136,8 @@ Example:
         ]
         self.fact_list = ", ".join(f'"{fact}"' for fact in self.fact_categories)
 
-        self.fact_extraction_prompt_template = (
-            fact_extraction_prompt_template or self.FACT_EXTRACTION_PROMPT_TEMPLATE
-        )
-        self.entailment_evaluation_prompt_template = (
-            entailment_evaluation_prompt_template
-            or self.ENTAILMENT_EVALUATION_PROMPT_TEMPLATE
-        )
+        self.fact_extraction_prompt_template = fact_extraction_prompt_template or self.FACT_EXTRACTION_PROMPT_TEMPLATE
+        self.entailment_evaluation_prompt_template = entailment_evaluation_prompt_template or self.ENTAILMENT_EVALUATION_PROMPT_TEMPLATE
 
         self.reference_facts_cache = reference_facts_cache or {}
 
@@ -174,9 +167,7 @@ Example:
             reference_facts = await self._extract_facts(reference_text)
             if reference_id:
                 self.reference_facts_cache[reference_id] = reference_facts
-                logging.info(
-                    f"Extracted {len(reference_facts)} facts from reference for id {reference_id}"
-                )
+                logging.info(f"Extracted {len(reference_facts)} facts from reference for id {reference_id}")
 
         # Extract facts from generated text
         generated_facts = await self._extract_facts(generated_text)
@@ -194,12 +185,8 @@ Example:
             }
 
         # Evaluate entailment in both directions
-        pred_to_gold_results = await self._evaluate_facts(
-            generated_facts, reference_text
-        )
-        gold_to_pred_results = await self._evaluate_facts(
-            reference_facts, generated_text
-        )
+        pred_to_gold_results = await self._evaluate_facts(generated_facts, reference_text)
+        gold_to_pred_results = await self._evaluate_facts(reference_facts, generated_text)
 
         # Calculate metrics
         metrics = self._calculate_metrics(pred_to_gold_results, gold_to_pred_results)
@@ -228,9 +215,7 @@ Example:
         ]
 
         # Calculate per-category metrics
-        category_metrics = self._calculate_category_metrics(
-            pred_facts_eval + gold_facts_eval
-        )
+        category_metrics = self._calculate_category_metrics(pred_facts_eval + gold_facts_eval)
 
         return {
             "score": metrics["f1"],  # Use F1 as the main score
@@ -254,9 +239,7 @@ Example:
         Returns:
             A formatted prompt for fact extraction
         """
-        return self.fact_extraction_prompt_template.format(
-            fact_list=self.fact_list, input_text=input_text
-        )
+        return self.fact_extraction_prompt_template.format(fact_list=self.fact_list, input_text=input_text)
 
     def get_entailment_evaluation_prompt(self, facts: str, reference_text: str) -> str:
         """
@@ -269,9 +252,7 @@ Example:
         Returns:
             A formatted prompt for entailment evaluation
         """
-        return self.entailment_evaluation_prompt_template.format(
-            facts=facts, reference_text=reference_text
-        )
+        return self.entailment_evaluation_prompt_template.format(facts=facts, reference_text=reference_text)
 
     async def _extract_facts(self, text: str) -> List[Dict[str, str]]:
         """
@@ -287,9 +268,7 @@ Example:
 
         try:
             system_message = "You are a medical fact extraction assistant. Extract facts from medical text as JSON."
-            completion = await self.llm_client.generate(
-                system_message=system_message, user_message=fact_extraction_prompt
-            )
+            completion = await self.llm_client.generate(system_message=system_message, user_message=fact_extraction_prompt)
             content = completion["content"]
 
             # Look for JSON pattern in the response
@@ -305,9 +284,7 @@ Example:
             logging.error(f"Error extracting facts: {e}")
             return []
 
-    async def _evaluate_facts(
-        self, facts: List[Dict[str, str]], reference_text: str
-    ) -> List[Dict[str, str]]:
+    async def _evaluate_facts(self, facts: List[Dict[str, str]], reference_text: str) -> List[Dict[str, str]]:
         """
         Evaluate entailment of facts against reference text.
 
@@ -321,19 +298,13 @@ Example:
         if not facts:
             return []
 
-        facts_formatted = "\n".join(
-            [f"{i}: {fact['category']}: {fact['fact']}" for i, fact in enumerate(facts)]
-        )
+        facts_formatted = "\n".join([f"{i}: {fact['category']}: {fact['fact']}" for i, fact in enumerate(facts)])
 
-        entailment_prompt = self.get_entailment_evaluation_prompt(
-            facts_formatted, reference_text
-        )
+        entailment_prompt = self.get_entailment_evaluation_prompt(facts_formatted, reference_text)
 
         try:
             system_message = "You are a medical entailment evaluation assistant."
-            completion = await self.llm_client.generate(
-                system_message=system_message, user_message=entailment_prompt
-            )
+            completion = await self.llm_client.generate(system_message=system_message, user_message=entailment_prompt)
             content = completion["content"]
 
             # Look for JSON pattern in the response
@@ -368,27 +339,15 @@ Example:
         entailment_values = {"Yes": 1.0, "Partial": 0.5, "No": 0.0}
 
         # Calculate precision (how many predicted facts are in gold)
-        precision_values = [
-            entailment_values.get(r.get("entailment", "No"), 0.0)
-            for r in pred_to_gold_results
-        ]
-        precision = (
-            sum(precision_values) / len(precision_values) if precision_values else 0.0
-        )
+        precision_values = [entailment_values.get(r.get("entailment", "No"), 0.0) for r in pred_to_gold_results]
+        precision = sum(precision_values) / len(precision_values) if precision_values else 0.0
 
         # Calculate recall (how many gold facts are in predicted)
-        recall_values = [
-            entailment_values.get(r.get("entailment", "No"), 0.0)
-            for r in gold_to_pred_results
-        ]
+        recall_values = [entailment_values.get(r.get("entailment", "No"), 0.0) for r in gold_to_pred_results]
         recall = sum(recall_values) / len(recall_values) if recall_values else 0.0
 
         # Calculate F1
-        f1 = (
-            2 * (precision * recall) / (precision + recall)
-            if (precision + recall) > 0
-            else 0.0
-        )
+        f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
 
         return {
             "precision": precision,
@@ -398,9 +357,7 @@ Example:
             "recall_support": len(recall_values),
         }
 
-    def _calculate_category_metrics(
-        self, fact_evaluations: List[Dict[str, Any]]
-    ) -> Dict[str, Dict[str, float]]:
+    def _calculate_category_metrics(self, fact_evaluations: List[Dict[str, Any]]) -> Dict[str, Dict[str, float]]:
         """
         Calculate metrics broken down by fact category.
 
@@ -423,35 +380,19 @@ Example:
             entailment_values = {"Yes": 1.0, "Partial": 0.5, "No": 0.0}
 
             # Split by direction
-            pred_to_gold = [
-                f for f in category_facts if f["direction"] == "pred_to_gold"
-            ]
-            gold_to_pred = [
-                f for f in category_facts if f["direction"] == "gold_to_pred"
-            ]
+            pred_to_gold = [f for f in category_facts if f["direction"] == "pred_to_gold"]
+            gold_to_pred = [f for f in category_facts if f["direction"] == "gold_to_pred"]
 
             # Calculate precision
-            precision_values = [
-                entailment_values.get(f["entailment"], 0.0) for f in pred_to_gold
-            ]
-            precision = (
-                sum(precision_values) / len(precision_values)
-                if precision_values
-                else 0.0
-            )
+            precision_values = [entailment_values.get(f["entailment"], 0.0) for f in pred_to_gold]
+            precision = sum(precision_values) / len(precision_values) if precision_values else 0.0
 
             # Calculate recall
-            recall_values = [
-                entailment_values.get(f["entailment"], 0.0) for f in gold_to_pred
-            ]
+            recall_values = [entailment_values.get(f["entailment"], 0.0) for f in gold_to_pred]
             recall = sum(recall_values) / len(recall_values) if recall_values else 0.0
 
             # Calculate F1
-            f1 = (
-                2 * (precision * recall) / (precision + recall)
-                if (precision + recall) > 0
-                else 0.0
-            )
+            f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
 
             category_metrics[category] = {
                 "precision": precision,
@@ -482,9 +423,7 @@ Example:
                 reference_facts = json.load(f)
 
             self.reference_facts_cache.update(reference_facts)
-            logging.info(
-                f"Successfully loaded reference facts for {len(reference_facts)} references"
-            )
+            logging.info(f"Successfully loaded reference facts for {len(reference_facts)} references")
             return True
         except Exception as e:
             logging.error(f"Error loading reference facts: {e}")
@@ -504,9 +443,7 @@ Example:
             with open(filepath, "w") as f:
                 json.dump(self.reference_facts_cache, f, indent=2)
 
-            logging.info(
-                f"Successfully saved reference facts for {len(self.reference_facts_cache)} references"
-            )
+            logging.info(f"Successfully saved reference facts for {len(self.reference_facts_cache)} references")
             return True
         except Exception as e:
             logging.error(f"Error saving reference facts: {e}")

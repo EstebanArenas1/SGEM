@@ -41,19 +41,22 @@ import time
 from skimage.morphology import skeletonize
 import attrs
 from os.path import join
+
 pd.set_option("display.max_rows", 500)
 import math
 
 from pprint import pprint
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 from .vasari_translation_maps import MAP_STR_TO_MAP
 
+
 @attrs.define
 class NiftiImage:
     path: str
-    spacing: tuple[float, float, float] = None   
+    spacing: tuple[float, float, float] = None
     img: nib.Nifti1Image = attrs.field(init=False)
     array: np.ndarray = attrs.field(init=False)
 
@@ -72,7 +75,7 @@ class NiftiImage:
         dx, dy, dz = self.spacing
         voxel_mm3 = dx * dy * dz
         return float(np.count_nonzero(self.array) * voxel_mm3 / 1000.0)
-    
+
     def save(self, out_path=None):
         """Save the NIfTI — auto-updates if needed."""
         if out_path is None:
@@ -85,7 +88,7 @@ class NiftiImage:
 @attrs.define
 class ExtractVASARI:
 
-    map_name: str = "vasari_concise" # options: 'vasari', 'vasari_sentence', 'vasari_reasoning', 'vasari_concise'
+    map_name: str = "vasari_concise"  # options: 'vasari', 'vasari_sentence', 'vasari_reasoning', 'vasari_concise'
 
     verbose: bool = False
 
@@ -115,11 +118,21 @@ class ExtractVASARI:
     num_components_cet_thresh: int = 15
 
     atlas_regions = [
-    "brainstem", "midline", "frontal_lobe", "insula", "occipital",
-    "parietal", "temporal", "thalamus", "corpus_callosum",
-    "ventricles", "internal_capsule", "cortex", "eloquent_grouped",]
+        "brainstem",
+        "midline",
+        "frontal_lobe",
+        "insula",
+        "occipital",
+        "parietal",
+        "temporal",
+        "thalamus",
+        "corpus_callosum",
+        "ventricles",
+        "internal_capsule",
+        "cortex",
+        "eloquent_grouped",
+    ]
 
-    
     COL_NAMES = [
         "Tumor Location",
         "Side of Tumor Epicenter",
@@ -156,27 +169,27 @@ class ExtractVASARI:
         temp = segmentation_array.nonzero()[0]
         mid = segmentation_array.shape[self.z_dim] // 2
         right_hemi = (temp < mid).sum()
-        left_hemi  = (temp > mid).sum()
-        if right_hemi > left_hemi:   side = "Right"
-        if left_hemi  > right_hemi:  side = "Left"
+        left_hemi = (temp > mid).sum()
+        if right_hemi > left_hemi:
+            side = "Right"
+        if left_hemi > right_hemi:
+            side = "Left"
         if right_hemi > self.focus_thresh and left_hemi > self.focus_thresh:
             side = "Bilateral"
         return side
-    
+
     def get_region_proportions(self, segmentation, atlas_regions):
         segmentation_array = segmentation.array.copy()
         segmentation_array[segmentation_array == self.oedema_label] = 0
         segmentation_array[segmentation_array == self.enhancing_label] = 1
         segmentation_array[segmentation_array == self.nonenhancing_label] = 1
         if segmentation_array.sum() == 0:
-            if self.verbose: logger.debug("No lesion detected, falling back to oedema label for closer inspection")
+            if self.verbose:
+                logger.debug("No lesion detected, falling back to oedema label for closer inspection")
             segmentation_array = segmentation.array
             segmentation_array[segmentation_array != self.oedema_label] = 0
-        
-        proportions = {
-            region_name: 
-            (segmentation_array * atlas_regions[region_name].array).nonzero()[0].size / (segmentation_array.sum() + self.cf) for region_name in atlas_regions.keys()
-        }
+
+        proportions = {region_name: (segmentation_array * atlas_regions[region_name].array).nonzero()[0].size / (segmentation_array.sum() + self.cf) for region_name in atlas_regions.keys()}
 
         d = {"ROI": list(proportions.keys()), "prop": list(proportions.values())}
         vols = pd.DataFrame(d).sort_values(by="prop", ascending=False).reset_index(drop=True)
@@ -186,63 +199,58 @@ class ExtractVASARI:
 
         ## ORIGINAL LOGIC
         BILOBAR_FULL = {
-            ("Frontal Lobe","Parietal Lobe"):   "Fronto-Parietal",
-            ("Parietal Lobe","Frontal Lobe"):   "Parieto-Frontal",
-
-            ("Frontal Lobe","Temporal Lobe"):   "Fronto-Temporal",
-            ("Temporal Lobe","Frontal Lobe"):   "Temporo-Frontal",
-
-            ("Frontal Lobe","Insula"):          "Fronto-Insular",
-            ("Insula","Frontal Lobe"):          "Insulo-Frontal",
-
-            ("Frontal Lobe","Occipital Lobe"):  "Fronto-Occipital",
-            ("Occipital Lobe","Frontal Lobe"):  "Occipito-Frontal",
-
-            ("Temporal Lobe","Parietal Lobe"):  "Temporo-Parietal",
-            ("Parietal Lobe","Temporal Lobe"):  "Parieto-Temporal",
-
-            ("Temporal Lobe","Occipital Lobe"): "Temporo-Occipital",
-            ("Occipital Lobe","Temporal Lobe"): "Occipito-Temporal",
-
-            ("Temporal Lobe","Insula"):         "Temporo-Insular",
-            ("Insula","Temporal Lobe"):         "Insulo-Temporal",
-
-            ("Parietal Lobe","Occipital Lobe"): "Parieto-Occipital",
-            ("Occipital Lobe","Parietal Lobe"): "Occipito-Parietal",
-
-            ("Parietal Lobe","Insula"):         "Parieto-Insular",
-            ("Insula","Parietal Lobe"):         "Insulo-Parietal",
+            ("Frontal Lobe", "Parietal Lobe"): "Fronto-Parietal",
+            ("Parietal Lobe", "Frontal Lobe"): "Parieto-Frontal",
+            ("Frontal Lobe", "Temporal Lobe"): "Fronto-Temporal",
+            ("Temporal Lobe", "Frontal Lobe"): "Temporo-Frontal",
+            ("Frontal Lobe", "Insula"): "Fronto-Insular",
+            ("Insula", "Frontal Lobe"): "Insulo-Frontal",
+            ("Frontal Lobe", "Occipital Lobe"): "Fronto-Occipital",
+            ("Occipital Lobe", "Frontal Lobe"): "Occipito-Frontal",
+            ("Temporal Lobe", "Parietal Lobe"): "Temporo-Parietal",
+            ("Parietal Lobe", "Temporal Lobe"): "Parieto-Temporal",
+            ("Temporal Lobe", "Occipital Lobe"): "Temporo-Occipital",
+            ("Occipital Lobe", "Temporal Lobe"): "Occipito-Temporal",
+            ("Temporal Lobe", "Insula"): "Temporo-Insular",
+            ("Insula", "Temporal Lobe"): "Insulo-Temporal",
+            ("Parietal Lobe", "Occipital Lobe"): "Parieto-Occipital",
+            ("Occipital Lobe", "Parietal Lobe"): "Occipito-Parietal",
+            ("Parietal Lobe", "Insula"): "Parieto-Insular",
+            ("Insula", "Parietal Lobe"): "Insulo-Parietal",
         }
-        regions = [name for name,_ in region_prop_list]     
+        regions = [name for name, _ in region_prop_list]
 
-        if len(regions)==1:
+        if len(regions) == 1:
             tumor_location = regions[0]
 
-        elif len(regions)==2:
+        elif len(regions) == 2:
             if tuple(regions) in BILOBAR_FULL:
                 tumor_location = BILOBAR_FULL[tuple(regions)] + " region"
             else:
-                r1 = regions[0].replace(" Lobe","")
-                r2 = regions[1].replace(" Lobe","")
+                r1 = regions[0].replace(" Lobe", "")
+                r2 = regions[1].replace(" Lobe", "")
                 tumor_location = f"{r1}-{r2} region"
 
         else:
             # 3+ lobes
-            parts = [r.replace(" Lobe","") for r in regions]
+            parts = [r.replace(" Lobe", "") for r in regions]
             tumor_location = f"{', '.join(parts[:-1])} and {parts[-1]} lobes"
 
         return proportions, region_prop_list, vols, tumor_location
-
 
     def get_eloquent_involvement(self, segmentation, atlas_regions):
         """
         Determine eloquent cortex involvement using segmented tumor + atlas annotations.
         """
-        eloquent_labels = {2: "Speech motor", 3: "Motor", 4: "Vision",}
+        eloquent_labels = {
+            2: "Speech motor",
+            3: "Motor",
+            4: "Vision",
+        }
 
         eloquent_involved = []
         for code, label in eloquent_labels.items():
-            mask = (atlas_regions['eloquent_grouped'].array == code)
+            mask = atlas_regions["eloquent_grouped"].array == code
             lesioned_voxels = np.count_nonzero(segmentation.array * mask)
 
             if lesioned_voxels > self.eloquent_thresh:
@@ -256,12 +264,7 @@ class ExtractVASARI:
         if len(eloquent_involved) == 1:
             return eloquent_involved[0]
         else:
-            return (
-                " and ".join([", ".join(eloquent_involved[:-1]), eloquent_involved[-1]])
-                if len(eloquent_involved) > 2
-                else " and ".join(eloquent_involved)
-            )
-
+            return " and ".join([", ".join(eloquent_involved[:-1]), eloquent_involved[-1]]) if len(eloquent_involved) > 2 else " and ".join(eloquent_involved)
 
     def process_midline_stats(self, metadata):
         bool_to_index = {True: 3, False: 2}
@@ -271,7 +274,7 @@ class ExtractVASARI:
         return oedema_cross_midline_f, nCET_cross_midline_f, CET_cross_midline_f
 
     def get_midline_involvement(self, metadata=None, segmentation=None):
-        assert (metadata is not None) ^ (segmentation is not None), 'Exactly one of metadata or segmentation should be provided.'
+        assert (metadata is not None) ^ (segmentation is not None), "Exactly one of metadata or segmentation should be provided."
         if metadata is not None:
             oedema_cross_midline_f, nCET_cross_midline_f, CET_cross_midline_f = self.process_midline_stats(metadata)
         else:
@@ -318,7 +321,7 @@ class ExtractVASARI:
             if oedema_cross_midline == True:
                 oedema_cross_midline_f = 3
             if oedema_cross_midline == False:
-                oedema_cross_midline_f = 2      
+                oedema_cross_midline_f = 2
         return oedema_cross_midline_f, nCET_cross_midline_f, CET_cross_midline_f
 
     def get_presence_of_cysts_and_satellites(self, segmentation_array):
@@ -336,14 +339,16 @@ class ExtractVASARI:
         num_components_cet_f = 2 if num_components_cet > self.num_components_cet_thresh else 1
         num_components_ncet_f = 2 if num_components_ncet > self.cyst_thresh else 1
 
-        if self.verbose: logger.debug("Cyst count " + str(num_components_ncet))
-        if self.verbose: logger.debug("Enhancing satetllite count " + str(num_components_cet))
+        if self.verbose:
+            logger.debug("Cyst count " + str(num_components_ncet))
+        if self.verbose:
+            logger.debug("Enhancing satetllite count " + str(num_components_cet))
 
         return num_components_cet_f, num_components_ncet_f
 
     def get_enhancing_thickness(self, segmentation_array):
         nonenhancing_voxels = np.count_nonzero(segmentation_array == self.nonenhancing_label)
-        voxel_length_mm = np.cbrt(self.resolution) # approximation of 1D length for voxels
+        voxel_length_mm = np.cbrt(self.resolution)  # approximation of 1D length for voxels
         CET_ss = segmentation_array.copy()
         CET_ss[CET_ss != self.enhancing_label] = 0
         CET_ss[CET_ss > 0] = 1
@@ -362,7 +367,8 @@ class ExtractVASARI:
             enhancing_thickness_f = 4
         if enhancing_thickness >= ll and nonenhancing_voxels == 0:
             enhancing_thickness_f = 5
-        if self.verbose: logger.debug(f"Enhancing thickness = {enhancing_thickness:.3f} mm")
+        if self.verbose:
+            logger.debug(f"Enhancing thickness = {enhancing_thickness:.3f} mm")
         return enhancing_thickness_f
 
     def compute_ap_tv_cc_multifocal(self, segmentation, include_labels=[1, 2], cm_or_mm="mm", min_dim_thresh_cm=3.0, debug_save_path=None):
@@ -437,23 +443,23 @@ class ExtractVASARI:
         return results
 
     def get_multifocal_or_multicentric(self, segmentation):
-        lesion_sizes = self.compute_ap_tv_cc_multifocal(segmentation, 
-                                                        include_labels=[self.nonenhancing_label, self.enhancing_label],  # ncr+et
-                                                        cm_or_mm="cm",
-                                                        min_dim_thresh_cm=0.5, #1.0,  # 0.5,
-                                                        )      
+        lesion_sizes = self.compute_ap_tv_cc_multifocal(
+            segmentation,
+            include_labels=[self.nonenhancing_label, self.enhancing_label],  # ncr+et
+            cm_or_mm="cm",
+            min_dim_thresh_cm=0.5,  # 1.0,  # 0.5,
+        )
         num_lesions = len(lesion_sizes)
         f9_multifocal = 2 if num_lesions > 1 else 1
-        if self.verbose: logger.debug("Number of lesion components: " + str(num_lesions))
+        if self.verbose:
+            logger.debug("Number of lesion components: " + str(num_lesions))
         return lesion_sizes, num_lesions, f9_multifocal
 
-
     def get_ventricle_volumes(self, merged_anatseg_array):
-        LEFT_LATERAL_VENTRICLE_IDX, RIGHT_LATERAL_VENTRICLE_IDX = 4, 43 ### HARDCODED from synthseg
+        LEFT_LATERAL_VENTRICLE_IDX, RIGHT_LATERAL_VENTRICLE_IDX = 4, 43  ### HARDCODED from synthseg
         vol_left_mm = np.sum(merged_anatseg_array == LEFT_LATERAL_VENTRICLE_IDX) * self.resolution
         vol_right_mm = np.sum(merged_anatseg_array == RIGHT_LATERAL_VENTRICLE_IDX) * self.resolution
         return vol_left_mm, vol_right_mm
-
 
     def get_ventricle_geometry_statistics(self, merged_anatseg_array, side, thresh_asym=1.45, enlarge_thresh=20e3):
         """
@@ -461,7 +467,7 @@ class ExtractVASARI:
         merged_anatseg : labeled anatomical+tumor segmentation (same format as input to get_ventricle_volumes)
         """
 
-        lvol, rvol = self.get_ventricle_volumes(merged_anatseg_array)   
+        lvol, rvol = self.get_ventricle_volumes(merged_anatseg_array)
 
         def is_compressed(v_affected, v_other, thresh=thresh_asym):
             if v_affected == 0 and v_other > 0:
@@ -480,7 +486,7 @@ class ExtractVASARI:
             if is_compressed(rvol, lvol):
                 asymmetrical_ventricles = 1
 
-        else:   
+        else:
             if min(lvol, rvol) > 0:
                 if max(lvol, rvol) / min(lvol, rvol) > 1.5:
                     asymmetrical_ventricles = 1
@@ -490,15 +496,15 @@ class ExtractVASARI:
 
         # enlarged_ventricles = 1 if (lvol > enlarge_thresh or rvol > enlarge_thresh) else 0
 
-        enlarged_ventricles=None
-        if (lvol > enlarge_thresh or rvol > enlarge_thresh):
-            enlarged_ventricles=[]
+        enlarged_ventricles = None
+        if lvol > enlarge_thresh or rvol > enlarge_thresh:
+            enlarged_ventricles = []
             if lvol > enlarge_thresh:
-                enlarged_ventricles.append('Left')
+                enlarged_ventricles.append("Left")
             if rvol > enlarge_thresh:
-                enlarged_ventricles.append('Right')
+                enlarged_ventricles.append("Right")
             # if len(enlarged_ventricles)>1:
-            enlarged_ventricles = ' and '.join(enlarged_ventricles)
+            enlarged_ventricles = " and ".join(enlarged_ventricles)
 
         if getattr(self, "verbose", False):
             logger.debug(f"Left ventricular volume:     {lvol}")
@@ -511,6 +517,7 @@ class ExtractVASARI:
 
     def translate_vasari_report(self, df, map_name):
         """Translate VASARI numeric codes in a DataFrame to human-readable strings and return as dict."""
+
         def translate_row(row, map_name="vasari"):
             mapping_dict = MAP_STR_TO_MAP[map_name]
             out = row.to_dict()
@@ -522,23 +529,22 @@ class ExtractVASARI:
                     except Exception:
                         out[col] = val
             return out
+
         translated_dicts = df.apply(lambda row: translate_row(row, map_name), axis=1).to_list()
         return translated_dicts[0]
-
 
     def extract_vasari_features(self, tumorseg_mni, tumorseg_ss, merged=None, metadata=None, mask_outside_brain=True):
         """Run full VASARI feature extraction"""
         start_time = time.time()
-        atlas_regions = {k:NiftiImage(join(self.atlases, f'{k}.nii.gz')) for k in self.atlas_regions}
+        atlas_regions = {k: NiftiImage(join(self.atlases, f"{k}.nii.gz")) for k in self.atlas_regions}
 
         segmentation = NiftiImage(tumorseg_mni)
         if mask_outside_brain:
-            MNI152 = NiftiImage(join(self.atlases,  "MNI152_T1_1mm_brain.nii.gz"))
+            MNI152 = NiftiImage(join(self.atlases, "MNI152_T1_1mm_brain.nii.gz"))
             mni_mask = (MNI152.array != 0) & (segmentation.array > 0)
             segmentation.array = segmentation.array * mni_mask
             segmentation.save()
 
-        
         segmentation_ss = NiftiImage(tumorseg_ss)
         if merged:
             merged_anat_tumor = NiftiImage(merged)
@@ -547,38 +553,41 @@ class ExtractVASARI:
                 segmentation_ss.array = segmentation_ss.array * mask
                 segmentation_ss.save()
 
-
-        if self.verbose: logger.debug("Running voxel quantification per tissue class")
+        if self.verbose:
+            logger.debug("Running voxel quantification per tissue class")
         total_lesion_burden = np.count_nonzero(segmentation_ss.array)
-        enhancing_voxels    = np.count_nonzero(segmentation_ss.array == self.enhancing_label)
+        enhancing_voxels = np.count_nonzero(segmentation_ss.array == self.enhancing_label)
         nonenhancing_voxels = np.count_nonzero(segmentation_ss.array == self.nonenhancing_label)
-        oedema_voxels       = np.count_nonzero(segmentation_ss.array == self.oedema_label)
-        proportion_enhancing = np.round( (enhancing_voxels / (total_lesion_burden + 0.1)) * 100 , 2)
-        proportion_nonenhancing = np.round( (nonenhancing_voxels / (total_lesion_burden + 0.1)) * 100 , 2)
-        proportion_oedema = np.round( ((oedema_voxels / (total_lesion_burden + 0.1))) * 100, 2)
+        oedema_voxels = np.count_nonzero(segmentation_ss.array == self.oedema_label)
+        proportion_enhancing = np.round((enhancing_voxels / (total_lesion_burden + 0.1)) * 100, 2)
+        proportion_nonenhancing = np.round((nonenhancing_voxels / (total_lesion_burden + 0.1)) * 100, 2)
+        proportion_oedema = np.round(((oedema_voxels / (total_lesion_burden + 0.1))) * 100, 2)
         ncr_vol_ml = nonenhancing_voxels * self.resolution / 1000.0
-        ed_vol_ml  = oedema_voxels  * self.resolution / 1000.0
-        et_vol_ml  = enhancing_voxels  * self.resolution / 1000.0
+        ed_vol_ml = oedema_voxels * self.resolution / 1000.0
+        et_vol_ml = enhancing_voxels * self.resolution / 1000.0
         global_vol_ml = total_lesion_burden * self.resolution / 1000.0
 
-        if self.verbose: logger.debug("Proportion Edema " + str(proportion_oedema))  
-        if self.verbose: logger.debug("Proportion Enhancing " + str(proportion_enhancing))  
-        if self.verbose: logger.debug("Proportion NCR " + str(proportion_nonenhancing))  
+        if self.verbose:
+            logger.debug("Proportion Edema " + str(proportion_oedema))
+        if self.verbose:
+            logger.debug("Proportion Enhancing " + str(proportion_enhancing))
+        if self.verbose:
+            logger.debug("Proportion NCR " + str(proportion_nonenhancing))
 
-        
-        if self.verbose: logger.debug("Deriving number of components")
+        if self.verbose:
+            logger.debug("Deriving number of components")
         labeled_array, num_components = label(segmentation_ss.array)
 
-
-        if self.verbose: logger.debug("Determining laterality")
+        if self.verbose:
+            logger.debug("Determining laterality")
         side = self.get_laterality(segmentation_array=segmentation.array)
 
-
-        if self.verbose: logger.debug("Determining proportions")
+        if self.verbose:
+            logger.debug("Determining proportions")
         proportions, region_prop_list, vols, tumor_location = self.get_region_proportions(segmentation, atlas_regions)
-        
 
-        if self.verbose: logger.debug("Determining enhancement quality (f4)")
+        if self.verbose:
+            logger.debug("Determining enhancement quality (f4)")
         enhancement_quality = 1
         if proportion_enhancing > 0:
             if proportion_enhancing > self.enh_quality_thresh:
@@ -586,57 +595,66 @@ class ExtractVASARI:
             else:
                 enhancement_quality = 2
 
-
-        if self.verbose: logger.debug("Determining ependymal extension (f19)")
-        if len((segmentation.array * atlas_regions['ventricles'].array).nonzero()[0]) >= self.t_ependymal:
+        if self.verbose:
+            logger.debug("Determining ependymal extension (f19)")
+        if len((segmentation.array * atlas_regions["ventricles"].array).nonzero()[0]) >= self.t_ependymal:
             ependymal = 2
         else:
             ependymal = 1
 
-
-        if self.verbose: logger.debug("Determining deep white matter involvement (f21)")
+        if self.verbose:
+            logger.debug("Determining deep white matter involvement (f21)")
         deep_wm_invaded = []
-        if len((segmentation.array * atlas_regions['brainstem'].array).nonzero()[0]) >= self.t_wm: deep_wm_invaded.append("Brainstem")
-        if len((segmentation.array * atlas_regions['corpus_callosum'].array).nonzero()[0]) >= self.t_wm: deep_wm_invaded.append("Corpus Callosum")
-        if len((segmentation.array * atlas_regions['internal_capsule'].array).nonzero()[0])>= self.t_wm: deep_wm_invaded.append("Internal Capsule")
-        deep_wm_f = 1 if len(deep_wm_invaded) == 0 else 2  
-        if self.verbose and deep_wm_f ==2: logger.debug(f"Deep WM regions invaded: {deep_wm_invaded}")
+        if len((segmentation.array * atlas_regions["brainstem"].array).nonzero()[0]) >= self.t_wm:
+            deep_wm_invaded.append("Brainstem")
+        if len((segmentation.array * atlas_regions["corpus_callosum"].array).nonzero()[0]) >= self.t_wm:
+            deep_wm_invaded.append("Corpus Callosum")
+        if len((segmentation.array * atlas_regions["internal_capsule"].array).nonzero()[0]) >= self.t_wm:
+            deep_wm_invaded.append("Internal Capsule")
+        deep_wm_f = 1 if len(deep_wm_invaded) == 0 else 2
+        if self.verbose and deep_wm_f == 2:
+            logger.debug(f"Deep WM regions invaded: {deep_wm_invaded}")
 
-        
-        if self.verbose: logger.debug("Determining cortical involvement (f20)")
-        cortical_lesioned_voxels   = len((segmentation.array * atlas_regions['cortex'].array).nonzero()[0])
+        if self.verbose:
+            logger.debug("Determining cortical involvement (f20)")
+        cortical_lesioned_voxels = len((segmentation.array * atlas_regions["cortex"].array).nonzero()[0])
         cortical_lesioned_voxels_f = 2 if cortical_lesioned_voxels > self.cortical_thresh else 1
-        if self.verbose: logger.debug(f"Cortically lesioned voxels: {cortical_lesioned_voxels}")
+        if self.verbose:
+            logger.debug(f"Cortically lesioned voxels: {cortical_lesioned_voxels}")
 
-
-        if self.verbose: logger.debug("Determining eloquent cortex involvement (f3) using Brodmann Area Maps Atlas")
+        if self.verbose:
+            logger.debug("Determining eloquent cortex involvement (f3) using Brodmann Area Maps Atlas")
         eloquent_text = self.get_eloquent_involvement(segmentation, atlas_regions)
 
-        if self.verbose: logger.debug("Determining midline involvement (f22, f23)")
+        if self.verbose:
+            logger.debug("Determining midline involvement (f22, f23)")
         oedema_cross_midline_f, nCET_cross_midline_f, CET_cross_midline_f = self.get_midline_involvement(metadata=metadata, segmentation=None if metadata else segmentation)
-      
 
-        if self.verbose: logger.debug("Determining presence of cysts (f8) and enhancing satellites (f24)")
-        num_components_cet_f, num_components_ncet_f= self.get_presence_of_cysts_and_satellites(segmentation_ss.array)
+        if self.verbose:
+            logger.debug("Determining presence of cysts (f8) and enhancing satellites (f24)")
+        num_components_cet_f, num_components_ncet_f = self.get_presence_of_cysts_and_satellites(segmentation_ss.array)
 
-        if self.verbose: logger.debug("Determining enhacement thickness (f11)")
+        if self.verbose:
+            logger.debug("Determining enhacement thickness (f11)")
         enhancing_thickness_f = self.get_enhancing_thickness(segmentation_ss.array)
 
-
-        if self.verbose: logger.debug("Determining multifocality or multicentricity (f9)")
+        if self.verbose:
+            logger.debug("Determining multifocality or multicentricity (f9)")
         lesion_sizes, num_lesions, f9_multifocal = self.get_multifocal_or_multicentric(segmentation_ss)
 
         if merged_anat_tumor:
-            if self.verbose: logger.debug("Determining ventricle geometry anomalies")
+            if self.verbose:
+                logger.debug("Determining ventricle geometry anomalies")
             lvol, rvol, asymmetrical_ventricles, enlarged_ventricles = self.get_ventricle_geometry_statistics(merged_anatseg_array=merged_anat_tumor.array, side=side)
             effaced_ventricles = None
             if asymmetrical_ventricles:
                 if lvol < rvol:
-                    effaced_ventricles='Left'
+                    effaced_ventricles = "Left"
                 if rvol < lvol:
-                    effaced_ventricles='Right'        
+                    effaced_ventricles = "Right"
 
-        if self.verbose: logger.debug("Converting raw values to VASARI dictionary features")
+        if self.verbose:
+            logger.debug("Converting raw values to VASARI dictionary features")
         result = pd.DataFrame(columns=self.COL_NAMES)
         result.loc[len(result)] = {
             #   'filename':file,
@@ -672,25 +690,25 @@ class ExtractVASARI:
             "Enlarged Ventricles": enlarged_ventricles,
             "Region Proportions": region_prop_list,
             "Lesion Sizes APxTVxCC (cm)": lesion_sizes,
-            "NCR Volume (mL)":float(ncr_vol_ml),
+            "NCR Volume (mL)": float(ncr_vol_ml),
             "ED Volume (mL)": float(ed_vol_ml),
             "ET Volume (mL)": float(et_vol_ml),
-            "Total tumor volume (mL)":float(global_vol_ml),
-            "Number of lesions":len(lesion_sizes), 
-            "Left Ventricle Volume (mm^3)": lvol, 
-            "Right Ventricle Volume (mm^3)": rvol, 
-
+            "Total tumor volume (mL)": float(global_vol_ml),
+            "Number of lesions": len(lesion_sizes),
+            "Left Ventricle Volume (mm^3)": lvol,
+            "Right Ventricle Volume (mm^3)": rvol,
         }
 
         end_time = time.time()
         time_taken = np.round(end_time - start_time, 2)
-        if self.verbose: logger.debug("Time taken: " + str(time_taken) + " seconds")
+        if self.verbose:
+            logger.debug("Time taken: " + str(time_taken) + " seconds")
 
         return result
 
     def __call__(self, tumorseg_mni, tumorseg_ss, merged=None, metadata=None):
         vasari_auto_report = self.extract_vasari_features(tumorseg_mni, tumorseg_ss, merged, metadata)
-        result = self.translate_vasari_report(vasari_auto_report, map_name = self.map_name)
+        result = self.translate_vasari_report(vasari_auto_report, map_name=self.map_name)
         keys_in_text_report = [
             "Tumor Location",
             "Side of Tumor Epicenter",
@@ -704,34 +722,30 @@ class ExtractVASARI:
             # "Number of lesions",
             # "Multiple satellites present",
             # "Thickness of enhancing margin"
-
         ]
         result = {key: val for key, val in result.items() if key in keys_in_text_report}
         vasari_auto_report = self.translate_vasari_report(vasari_auto_report, map_name="vasari")
         vasari_auto_report["Text Report"] = ", ".join(result.values()).capitalize() + "."
         vasari_auto_report = dict(sorted(vasari_auto_report.items()))
-        logger.info('* Finished VASARI Feature extraction!')
+        logger.info("* Finished VASARI Feature extraction!")
         return vasari_auto_report
 
 
-if __name__ == '__main__':
-    tumorseg_mni='/pscratch/sd/j/jehr/MSFT/BTReport/data/example/45203724572086/tmp/tumor_seg_in_MNI152_space.nii.gz'
-    tumorseg_ss = '/pscratch/sd/j/jehr/MSFT/BTReport/data/example/45203724572086/45203724572086-seg.nii.gz'
-    merged = '/pscratch/sd/j/jehr/MSFT/BTReport/data/example/45203724572086/tmp/MNI152_in_subject_space_merged_seg.nii.gz'
+if __name__ == "__main__":
+    tumorseg_mni = "/pscratch/sd/j/jehr/MSFT/BTReport/data/example/45203724572086/tmp/tumor_seg_in_MNI152_space.nii.gz"
+    tumorseg_ss = "/pscratch/sd/j/jehr/MSFT/BTReport/data/example/45203724572086/45203724572086-seg.nii.gz"
+    merged = "/pscratch/sd/j/jehr/MSFT/BTReport/data/example/45203724572086/tmp/MNI152_in_subject_space_merged_seg.nii.gz"
     metadata = {
         "crosses_ideal_midline": {
             "ncr": True,
             "ed": False,
             "et": True,
-            "ncr_et": True,   
+            "ncr_et": True,
         }
     }
     extractor = ExtractVASARI(verbose=False)
     result = extractor(tumorseg_mni, tumorseg_ss, merged, metadata)
 
-    pprint(result) #.iloc[0].to_dict())
+    pprint(result)  # .iloc[0].to_dict())
 
-
-
-                
     ######## TODO: add ventricular effacement! add synthseg regions involved

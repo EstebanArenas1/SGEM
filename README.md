@@ -45,6 +45,7 @@ The framework consists of four components:
 
 
 
+
 ## Installation (~1.5 hours)
 
 Installation is divided into three steps:
@@ -89,29 +90,68 @@ See [INSTALL.md](docs/INSTALL.md) for full installation instructions on HPC syst
 
 
 ### 3. Report generation
-#### For a single subject:
+<!-- #### For a single subject:
 
 ```bash
 module load apptainer
 conda activate BTReport
-python3 -m btreport.generate_report --subject_folder <path/to/subject/folder> --llm gpt-oss:120b
-```
-#### For multiple subjects in a directory:
+python3 -m btreport.generate_report \
+  --subject_folder <path/to/subject/folder> \
+  --llm gpt-oss:120b
+``` -->
+#### For all subjects in a directory:
 ```bash
 module load apptainer
 conda activate BTReport
-python3 -m btreport.run_all_reports --root_folder <path/to/root/folder> --llm llama3:70b
+python3 -m btreport.run_all_reports \
+  --root_folder <path/to/root/folder> \
+  --llm llama3:70b
 ```
+This command will extract all of the relevant metadata, then generate reports for each subject individually. Additionally, if a ground truth report is provided for a subject, the paired ground truth and predicted reports will be saved to `root_folder/merged_reports_btreport.json` for evaluation.
+
 
 ### 4. Evaluation against real report
+To evaluate the quality of reports, we compare generated reports to ground truth clinical reports when they are available. The following command calculates the evaluation metrics included in the BTReport manuscript, taking `root_folder/merged_reports_btreport.json` as an input.
 
+#### For metrics without verbose explanations
+```bash
+python3 -m btreport.eval_json \
+  --json </path/to/merged_reports_btreport.json> \
+  --real_report_key "Clinical Report" \
+  --synthetic_report_key "Predicted Report (gpt-oss:120b)" \
+  --parse-real \
+  --parse-synthetic \ 
+  --devices 0,1
 
+```
 
+#### For full verbose metric details
+```bash
+python3 -m btreport.eval_json \
+  --json </path/to/merged_reports_btreport.json> \
+  --real_report_key "Clinical Report" \
+  --synthetic_report_key "Predicted Report (llama3:70b)" \
+  --devices 0,1 \
+  --parse-real \
+  --no-parse-synthetic \
+  --do_details
+
+```
+
+![-----------------------------------------------------](assets/purpleline.png)
+
+## Example findings generated with BTReport
+
+**MASS EFFECT & VENTRICLES:**  
+There is an approximately 10 mm leftward midline shift at the level of the fourth ventricle. The right lateral ventricle, including the inferior horn, is effaced by tumor, whereas the left lateral ventricle is enlarged, producing marked ventricular asymmetry. No tonsillar herniation is seen, and the basal cisterns remain patent.
+
+**BRAIN / ENHANCEMENT:**  
+A solitary, markedly enhancing lesion centered in the right cortex involving the parietal, occipital, and temporal lobes measures 7.1 × 4.9 × 5.9 cm (AP × TV × CC). The enhancing rim is thick (>3 mm). The lesion demonstrates ependymal invasion of the right lateral ventricle and extends into deep right-sided structures, including the thalamus, caudate, putamen, pallidum, and hippocampus, with associated deep white matter infiltration. Multiple small enhancing satellite nodules are present adjacent to the main mass. Approximately 6% of the lesion is non-enhancing necrotic tissue. A large surrounding FLAIR-hyperintense region consistent with vasogenic edema comprises the majority of the lesion volume (66%) but does not cross the midline. The enhancing component remains confined to the right side.
 
 ![-----------------------------------------------------](assets/purpleline.png)
 
 ## Dataset
-We provide a companion dataset which augments BraTS imaging with these features to further research in neuro-oncology report generation.
+[COMING SOON] We provide a companion dataset which augments BraTS imaging with these features to further research in neuro-oncology report generation.
 
 
 

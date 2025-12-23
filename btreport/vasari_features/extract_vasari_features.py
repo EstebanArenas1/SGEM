@@ -10,10 +10,18 @@ ATLASES = "btreport/vasari_features/atlas_masks/"
 
 
 def vasari_features(tumor, tumor_mni, metadata, merged, map_name="vasari_concise", save_dir=None, verbose=False, ncr_label=1, ed_label=2, et_label=4):
-    logger.info('** [3/4] Starting VASARI Feature extraction...')
+    logger.info("** [3/4] Starting VASARI Feature extraction...")
     vasari_auto_report = get_vasari_features(
-        file=tumor_mni, file_ss=tumor, atlases=ATLASES, metadata=metadata, merged=merged, verbose=verbose, enh_quality_thresh=50,
-        enhancing_label=et_label, nonenhancing_label=ncr_label, oedema_label=ed_label,
+        file=tumor_mni,
+        file_ss=tumor,
+        atlases=ATLASES,
+        metadata=metadata,
+        merged=merged,
+        verbose=verbose,
+        enh_quality_thresh=50,
+        enhancing_label=et_label,
+        nonenhancing_label=ncr_label,
+        oedema_label=ed_label,
     )
     result = translate_vasari_report(vasari_auto_report, map_name=map_name)
     keys_in_text_report = [
@@ -31,7 +39,7 @@ def vasari_features(tumor, tumor_mni, metadata, merged, map_name="vasari_concise
     vasari_auto_report = translate_vasari_report(vasari_auto_report, map_name="vasari")
     vasari_auto_report["Text Report"] = ", ".join(result.values()).capitalize() + "."
     vasari_auto_report = dict(sorted(vasari_auto_report.items()))
-    logger.info('* Finished VASARI Feature extraction!')
+    logger.info("* Finished VASARI Feature extraction!")
 
     if save_dir is not None:
         with open(os.path.join(save_dir, "vasari_features.json"), "w") as f:

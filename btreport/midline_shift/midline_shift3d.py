@@ -12,15 +12,8 @@ from collections import defaultdict
 logger = logging.getLogger(__name__)
 
 
+SLAB_NAME = {1: "falx cerebri above", 2: "septum pellucidum", 3: "third ventricle", 4: "fourth ventricle", 5: "falx cerebri below"}
 
-
-SLAB_NAME = {
-    1: "falx cerebri above",
-    2: "septum pellucidum",
-    3: "third ventricle",
-    4: "fourth ventricle",
-    5: "falx cerebri below"
-}
 
 def get_levels_zslabs(anat_seg, save_path=None):
     atlas_nii = nib.load(anat_seg)
@@ -42,27 +35,29 @@ def get_levels_zslabs(anat_seg, save_path=None):
     vol = np.zeros_like(atlas, dtype=np.uint8)
 
     # ===== find Z ranges =====
-    z_sp = np.where(np.any(np.isin(atlas, SP_LABELS), axis=(0,1)))[0]
-    z_3v = np.where(np.any(atlas == THIRD_V, axis=(0,1)))[0]
-    z_4v = np.where(np.any(atlas == FOURTH_V, axis=(0,1)))[0]
+    z_sp = np.where(np.any(np.isin(atlas, SP_LABELS), axis=(0, 1)))[0]
+    z_3v = np.where(np.any(atlas == THIRD_V, axis=(0, 1)))[0]
+    z_4v = np.where(np.any(atlas == FOURTH_V, axis=(0, 1)))[0]
 
-    if len(z_sp)==0: raise ValueError("No septum pellucidum detected.")
-    if len(z_4v)==0: raise ValueError("No 4th ventricle detected.")
+    if len(z_sp) == 0:
+        raise ValueError("No septum pellucidum detected.")
+    if len(z_4v) == 0:
+        raise ValueError("No 4th ventricle detected.")
 
     z_sp_min, z_sp_max = z_sp.min(), z_sp.max()
     z_4v_min, z_4v_max = z_4v.min(), z_4v.max()
 
     # ===== full-slice slab assignment =====
-    vol[:, :, :z_4v_min]         = BELOW          # inferior brain
-    if len(z_3v)>0:
+    vol[:, :, :z_4v_min] = BELOW  # inferior brain
+    if len(z_3v) > 0:
         z3_min, z3_max = z_3v.min(), z_3v.max()
-        vol[:, :, z_4v_min:z3_min]   = V4        # 4th vent slab zone
-        vol[:, :, z3_min:z_sp_min]   = V3        # 3rd vent slab zone
+        vol[:, :, z_4v_min:z3_min] = V4  # 4th vent slab zone
+        vol[:, :, z3_min:z_sp_min] = V3  # 3rd vent slab zone
     else:
-        vol[:, :, z_4v_min:z_sp_min] = V4        # no third vent found
+        vol[:, :, z_4v_min:z_sp_min] = V4  # no third vent found
 
-    vol[:, :, z_sp_min:z_sp_max+1] = SP          # SP slab block
-    vol[:, :, z_sp_max+1:]         = ABOVE       # superior slab
+    vol[:, :, z_sp_min : z_sp_max + 1] = SP  # SP slab block
+    vol[:, :, z_sp_max + 1 :] = ABOVE  # superior slab
 
     # remove outside brain
     vol = vol * brain_mask.astype(np.uint8)
@@ -132,32 +127,24 @@ def get_levels_zslabs(anat_seg, save_path=None):
 #     return vol
 
 
-
 def get_max_level(zslabs, distances):
     idx = np.unravel_index(np.argmax(distances), distances.shape)
     _, _, z = idx
-    vals, counts = np.unique(zslabs[:, :, z][zslabs[:, :, z] != 0], return_counts=True)    
+    vals, counts = np.unique(zslabs[:, :, z][zslabs[:, :, z] != 0], return_counts=True)
     level = vals[np.argmax(counts)]
     return level
 
 
 def get_level_of_midline_shift(metadata, distances_path, anat_seg_path):
-    distances = nib.load(distances_path).get_fdata()    
-    zslabs = get_levels_zslabs(anat_seg=anat_seg_path, save_path=distances_path.replace('.nii', '_slabs.nii'))
+    distances = nib.load(distances_path).get_fdata()
+    zslabs = get_levels_zslabs(anat_seg=anat_seg_path, save_path=distances_path.replace(".nii", "_slabs.nii"))
     level_idx = get_max_level(zslabs=zslabs, distances=distances)
 
     level_max_shift = SLAB_NAME[level_idx]
 
-    metadata['level_max_shift'] = level_max_shift
+    metadata["level_max_shift"] = level_max_shift
 
     return metadata
-
-
-
-
-
-
-
 
 
 def interpolate_midline_rows(midline_path, t1_path, out_path, plane_axis=2, interp_axis=1):
@@ -235,7 +222,7 @@ def ideal_midline_from_deformed(deformed_midline_path, ideal_midline_path, overw
         logger.info(f"- Saved ideal midline to: {ideal_midline_path}")
         return out_nii
     else:
-        logger.info(f'Path {ideal_midline_path} exists, skipping ideal midline creation step...')
+        logger.info(f"Path {ideal_midline_path} exists, skipping ideal midline creation step...")
 
 
 def select_regions(seg, regions):
@@ -368,7 +355,6 @@ def to_builtin(obj):
 #     return data
 
 
-
 def update_midline(
     subject_midline_path,
     ideal_midline_path,
@@ -437,31 +423,17 @@ def update_midline(
         smallest_volume_ideal[region] = subregion_overlaps_ideal[region][np.argmin(subregion_overlaps_ideal[region])]
 
         if verbose:
-            logger.info(
-                f"Tumor size {region}, volumes {subregion_overlaps[region]}; "
-                f"Primary side: {sides[np.abs(1-np.argmin(subregion_overlaps[region]))]}"
-            )
-            logger.info(
-                f"[ideal midline] Tumor size {region}, volumes {subregion_overlaps_ideal[region]}; "
-                f"Primary side: {sides[np.abs(1-np.argmin(subregion_overlaps_ideal[region]))]}"
-            )
-            logger.info(
-                f"crosses midline {region}: "
-                f"{subregion_overlaps_ideal[region][np.argmin(subregion_overlaps_ideal[region])] > crosses_threshold}"
-            )
+            logger.info(f"Tumor size {region}, volumes {subregion_overlaps[region]}; " f"Primary side: {sides[np.abs(1-np.argmin(subregion_overlaps[region]))]}")
+            logger.info(f"[ideal midline] Tumor size {region}, volumes {subregion_overlaps_ideal[region]}; " f"Primary side: {sides[np.abs(1-np.argmin(subregion_overlaps_ideal[region]))]}")
+            logger.info(f"crosses midline {region}: " f"{subregion_overlaps_ideal[region][np.argmin(subregion_overlaps_ideal[region])] > crosses_threshold}")
 
         data["volumes_ideal_midline"][region] = dict(zip(sides, subregion_overlaps_ideal[region]))
-        data["crosses_ideal_midline"][region] = (
-            subregion_overlaps_ideal[region][np.argmin(subregion_overlaps_ideal[region])] > crosses_threshold
-        )
+        data["crosses_ideal_midline"][region] = subregion_overlaps_ideal[region][np.argmin(subregion_overlaps_ideal[region])] > crosses_threshold
         data["primary_side_ideal_midline"][region] = sides[np.argmax(subregion_overlaps_ideal[region])]
 
         data["volumes_patient_midline"][region] = dict(zip(sides, subregion_overlaps[region]))
         data["primary_side_patient_midline"][region] = sides[np.argmax(subregion_overlaps[region])]
-        data["crosses_patient_midline"][region] = (
-            subregion_overlaps[region][np.argmin(subregion_overlaps[region])] > crosses_threshold
-        )
-
+        data["crosses_patient_midline"][region] = subregion_overlaps[region][np.argmin(subregion_overlaps[region])] > crosses_threshold
 
     crosses_ncr_et = data["crosses_patient_midline"]["ncr_et"]
     dilated = binary_dilation(smallest_volume["ncr_et"], iterations=1)
@@ -473,25 +445,19 @@ def update_midline(
     updated_midline = ~(~(outer_shell_tumor & outer_shell)) | (binary_midline & ~binary_ncr_et)
 
     if crosses_ncr_et:
-        logger.info(f'NCR + ET crosses midline...')
+        logger.info(f"NCR + ET crosses midline...")
         updated_midline[binary_ncr_et] = 0
-
 
     if not os.path.exists(updated_midline_save_path) or overwrite:
         nib.save(
             nib.Nifti1Image(updated_midline.astype(np.uint8), subject_midline_im.affine, subject_midline_im.header),
             updated_midline_save_path,
         )
-        logger.info(
-            f'Updated midline to account for tumor... saved updated mask to {updated_midline_save_path}'
-        )
+        logger.info(f"Updated midline to account for tumor... saved updated mask to {updated_midline_save_path}")
     else:
-        logger.info(
-            f'Path {updated_midline_save_path} exists, skipping midline updating save step...'
-        )
+        logger.info(f"Path {updated_midline_save_path} exists, skipping midline updating save step...")
 
     return data
-
 
 
 def merge_masks(masks):
@@ -533,7 +499,16 @@ def connect_labels_plane(mask, label1=1, label2=2):
     return connected, line_lengths_by_slice
 
 
-def midline_distance_fill(ideal_midline_path, deformed_midline_path, midline_distances_path, overwrite=False, label_ideal=2, label_deformed=1, metadata=None, save_dir=None,):
+def midline_distance_fill(
+    ideal_midline_path,
+    deformed_midline_path,
+    midline_distances_path,
+    overwrite=False,
+    label_ideal=2,
+    label_deformed=1,
+    metadata=None,
+    save_dir=None,
+):
     """Compute per-line midline distances and save both NIfTI and JSON summary."""
     ideal = nib.load(str(ideal_midline_path)).get_fdata()
     deformed = nib.load(str(deformed_midline_path)).get_fdata()
@@ -548,7 +523,7 @@ def midline_distance_fill(ideal_midline_path, deformed_midline_path, midline_dis
         nib.save(out_nii, str(midline_distances_path))
         logger.info(f"- Saved midline distance map to: {midline_distances_path}")
     else:
-        logger.info(f'Path {midline_distances_path} exists, skipping midline distances save step...')
+        logger.info(f"Path {midline_distances_path} exists, skipping midline distances save step...")
 
     # Pick per-slice signed max (by absolute magnitude)
     max_shift_per_slice = {int(z): float(v[np.argmax(np.abs(v))]) if len(v) else 0.0 for z, v in line_lengths.items()}
@@ -564,13 +539,11 @@ def midline_distance_fill(ideal_midline_path, deformed_midline_path, midline_dis
     else:
         mean_shift = median_shift = max_shift = p95_shift = None
 
-    midline_shift_present='No'
-    if np.abs(max_shift)  > 5:
-        midline_shift_present='Yes'
+    midline_shift_present = "No"
+    if np.abs(max_shift) > 5:
+        midline_shift_present = "Yes"
     elif 3 < np.abs(max_shift) < 5:
-        midline_shift_present='Minimal'
-
-
+        midline_shift_present = "Minimal"
 
     summary = {
         # "midline_shift_file": str(midline_distances_path),
@@ -600,8 +573,6 @@ def midline_shift_3d(tmp_dir, tumor, ncr_label=1, ed_label=2, et_label=4, overwr
     ideal_midline_path = os.path.join(tmp_dir, "ideal_midline.nii.gz")
     midline_distances_path = os.path.join(tmp_dir, "midline_distances.nii.gz")
     anat_seg_path = os.path.join(tmp_dir, "MNI152_in_subject_space_synthseg.nii.gz")
-
-    logger.info(f"** [2/4] Starting midline shift processing...")
 
     ideal_midline_from_deformed(
         deformed_midline_path=deformed_midline_path,

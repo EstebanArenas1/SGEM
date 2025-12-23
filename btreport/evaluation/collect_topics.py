@@ -8,7 +8,8 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import textwrap
 
-def main(root = "/pscratch/sd/j/jehr/MSFT/BTReport/data/example", report_key="generated_facts", N_debug=80):    
+
+def main(root="/pscratch/sd/j/jehr/MSFT/BTReport/data/example", report_key="generated_facts", N_debug=80):
     dirs = [join(root, d) for d in os.listdir(root) if os.path.isdir(join(root, d))]
 
     all_ref_facts = []
@@ -27,27 +28,20 @@ def main(root = "/pscratch/sd/j/jehr/MSFT/BTReport/data/example", report_key="ge
         for item in ref_facts:
             all_ref_facts.append(item["fact"])
 
-        if idx >= N_debug: 
+        if idx >= N_debug:
             break
 
     print(f"Total facts collected: {len(all_ref_facts)}")
-
 
     # embed
     model = SentenceTransformer("all-MiniLM-L6-v2")  # lightweight and fast
     emb = model.encode(all_ref_facts, convert_to_tensor=False)
 
     # cluster
-    clustering = AgglomerativeClustering(
-        metric="cosine",
-        linkage="average",
-        distance_threshold=0.30,
-        n_clusters=None
-    ).fit(emb)
+    clustering = AgglomerativeClustering(metric="cosine", linkage="average", distance_threshold=0.30, n_clusters=None).fit(emb)
 
     labels = clustering.labels_
     print(f"Num clusters found: {len(set(labels))}")
-
 
     # build cluster dict
     clusters = defaultdict(list)
@@ -57,30 +51,29 @@ def main(root = "/pscratch/sd/j/jehr/MSFT/BTReport/data/example", report_key="ge
     # Sort clusters by size
     sorted_clusters = sorted(clusters.items(), key=lambda x: len(x[1]), reverse=True)
 
-
-    # display 
+    # display
     print("\n========== Top Clusters ==========\n")
     for cluster_id, facts in sorted_clusters[:20]:
         print(f"\n### Cluster {cluster_id}  | {len(facts)} facts")
-        for f in facts[:10]:  
+        for f in facts[:10]:
             print(" •", f)
 
     out = []
     for cluster_id, facts in tqdm(sorted_clusters):
         desc = describe_cluster_ollama(facts)
-        out.append({
-            "cluster_description":desc,
-            "cluster_id": int(cluster_id),
-            "count": len(facts),
-            "facts": facts,
-        })
+        out.append(
+            {
+                "cluster_description": desc,
+                "cluster_id": int(cluster_id),
+                "count": len(facts),
+                "facts": facts,
+            }
+        )
 
-    with open(join(root,"pred_fact_clusters.json"), "w") as f:
+    with open(join(root, "pred_fact_clusters.json"), "w") as f:
         json.dump(out, f, indent=2)
 
     print(f"Saved to {join(root,'pred_fact_clusters.json')}")
-
-
 
 
 def describe_cluster_ollama(facts, model="gemma3:27b", max_examples=8):
@@ -96,17 +89,13 @@ def describe_cluster_ollama(facts, model="gemma3:27b", max_examples=8):
         "You are an expert radiologist summarizing clusters of radiology facts. "
         "Given the example fact statements below, write a short 3-8 word description "
         "that captures the shared semantic meaning.\n\n"
-        "FACTS:\n- "
-        + "\n- ".join(sample_facts)
-        + "\n\nDescription:"
+        "FACTS:\n- " + "\n- ".join(sample_facts) + "\n\nDescription:"
     )
 
     try:
         response = ollama.chat(
             model=model,
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
+            messages=[{"role": "user", "content": prompt}],
         )
         desc = response["message"]["content"].strip()
         return desc
@@ -114,9 +103,6 @@ def describe_cluster_ollama(facts, model="gemma3:27b", max_examples=8):
     except Exception as e:
         print(f"[WARN] Ollama failed: {e}")
         return "general finding category"
-
-
-
 
 
 def compute_fact_frequency_distribution(
@@ -160,17 +146,13 @@ def compute_fact_frequency_distribution(
 
     # Optional plot
 
-
     if save_plot:
         labels = [d for d, _ in freq_sorted[:top_k]]
         labels = [l[0:100] for l in labels]
         counts = [c for _, c in freq_sorted[:top_k]]
 
         # Wrap long labels to multiple lines
-        wrapped_labels = [
-            "\n".join(textwrap.wrap(label, width=55))  # adjust width as needed
-            for label in labels
-        ]
+        wrapped_labels = ["\n".join(textwrap.wrap(label, width=55)) for label in labels]  # adjust width as needed
 
         # Increase figure height based on number of labels
         plt.figure(figsize=(14, 0.4 * top_k + 2))
@@ -180,7 +162,7 @@ def compute_fact_frequency_distribution(
         plt.title(f"Top {top_k} Most Common Radiology Fact Clusters")
 
         # Reduce font size if needed
-        plt.gca().tick_params(axis='y', labelsize=9)
+        plt.gca().tick_params(axis="y", labelsize=9)
 
         plt.tight_layout()
         plt.savefig(plot_path)
@@ -196,8 +178,9 @@ from sklearn.manifold import TSNE
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def tsne_with_legend_save(
-    root='/pscratch/sd/j/jehr/MSFT/BTReport/data/example',
+    root="/pscratch/sd/j/jehr/MSFT/BTReport/data/example",
     json_name="pred_fact_clusters.json",
     out_name="/pscratch/sd/j/jehr/MSFT/BTReport/data/example/tsne_clusters.png",
     perplexity=50,
@@ -205,7 +188,7 @@ def tsne_with_legend_save(
     point_size=12,
     name_chars=20,
 ):
-    #  load clusters 
+    #  load clusters
     with open(join(root, json_name), "r") as f:
         clusters = json.load(f)
 
@@ -230,11 +213,11 @@ def tsne_with_legend_save(
 
     print(f"Loaded {len(facts)} facts across {len(unique_ids)} clusters.")
 
-    #  embeddings 
+    #  embeddings
     model = SentenceTransformer("all-MiniLM-L6-v2")
     emb = model.encode(facts, convert_to_tensor=False)
 
-    #  t-SNE 
+    #  t-SNE
     tsne = TSNE(
         n_components=2,
         metric="cosine",
@@ -244,18 +227,13 @@ def tsne_with_legend_save(
     )
     coords = tsne.fit_transform(emb)
 
-    #  plot 
+    #  plot
     plt.figure(figsize=figsize)
 
     for cid in unique_ids:
-        idx = (labels == cid)
+        idx = labels == cid
         label_name = f"{cid}: {names[cid]}"  # formatted name
-        plt.scatter(
-            coords[idx, 0],
-            coords[idx, 1],
-            s=point_size,
-            label=label_name
-        )
+        plt.scatter(coords[idx, 0], coords[idx, 1], s=point_size, label=label_name)
 
     plt.title("t-SNE of Fact Clusters", fontsize=14)
     plt.axis("off")
@@ -278,7 +256,7 @@ def tsne_with_legend_save(
     return coords, labels, facts, names
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # main()
-    # compute_fact_frequency_distribution() 
+    # compute_fact_frequency_distribution()
     tsne_with_legend_save()

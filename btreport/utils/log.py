@@ -8,7 +8,7 @@ def get_logger(subject="—"):
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] [%(subject)s] %(message)s",
-        force=True  # ensures basicConfig applies even after imports
+        force=True,  # ensures basicConfig applies even after imports
     )
 
     old_factory = logging.getLogRecordFactory()
@@ -21,3 +21,4 @@ def get_logger(subject="—"):
     logging.setLogRecordFactory(factory)
 
     return logging.getLogger("btreport")  # optional default logger
+

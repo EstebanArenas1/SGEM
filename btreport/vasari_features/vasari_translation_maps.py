@@ -291,5 +291,3 @@ MAP_STR_TO_MAP = {
     "vasari_reasoning": VASARI_REASONING_MAPS,
     "vasari_concise": VASARI_CONCISE_MAPS,
 }
-
-

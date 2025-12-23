@@ -356,11 +356,7 @@ def get_vasari_features(
     elif len(eloquent_involved) == 1:
         eloquent_text = eloquent_involved[0]
     else:
-        eloquent_text = (
-            " and ".join([", ".join(eloquent_involved[:-1]), eloquent_involved[-1]])
-            if len(eloquent_involved) > 2
-            else " and ".join(eloquent_involved)
-        )
+        eloquent_text = " and ".join([", ".join(eloquent_involved[:-1]), eloquent_involved[-1]]) if len(eloquent_involved) > 2 else " and ".join(eloquent_involved)
 
     if verbose:
         logger.debug(f"Eloquent regions involved: {eloquent_text}")
@@ -555,7 +551,6 @@ def get_vasari_features(
     # New logic: return float proportions
     proportion_nonenhancing_f = proportion_nonenhancing
 
-
     # Old logic: bin proportions
     # proportion_necrosis_f = np.nan
     # if proportion_nonenhancing == 0:
@@ -570,8 +565,6 @@ def get_vasari_features(
     # New logic: return float proportions
     proportion_necrosis_f = proportion_nonenhancing
 
-
-
     # Original multifocal logic
     # segmentation_array_binary = segmentation_array.copy()
     # segmentation_array_binary[segmentation_array_binary>0]=1
@@ -583,34 +576,27 @@ def get_vasari_features(
     # logger.debug('Number of lesion components: '+str(num_components_bin))
 
     # New multifocal logic
-    voxel_sizes = [1., 1., 1.]
-    lesion_sizes = compute_ap_tv_cc_multifocal(
-        file_ss,
-        include_labels=[nonenhancing_label, enhancing_label],  # ncr+et
-        cm_or_mm="cm",
-        min_dim_thresh_cm=1.0,  # 0.5,
-        voxel_sizes=voxel_sizes
-    )
+    voxel_sizes = [1.0, 1.0, 1.0]
+    lesion_sizes = compute_ap_tv_cc_multifocal(file_ss, include_labels=[nonenhancing_label, enhancing_label], cm_or_mm="cm", min_dim_thresh_cm=1.0, voxel_sizes=voxel_sizes)  # ncr+et  # 0.5,
     num_lesions = len(lesion_sizes)
-    seg =nib.load(file_ss).get_fdata()
+    seg = nib.load(file_ss).get_fdata()
 
     # voxel_sizes = [sx, sy, sz] in mm
-    voxel_volume_mm3 = np.prod(voxel_sizes)        # mm^3 per voxel
-    voxel_volume_ml  = voxel_volume_mm3 / 1000.0   # convert mm^3 to mL
+    voxel_volume_mm3 = np.prod(voxel_sizes)  # mm^3 per voxel
+    voxel_volume_ml = voxel_volume_mm3 / 1000.0  # convert mm^3 to mL
 
     # voxel counts
     ncr_vox = np.sum(seg == nonenhancing_label)
-    ed_vox  = np.sum(seg == oedema_label)
-    et_vox  = np.sum(seg == enhancing_label )
+    ed_vox = np.sum(seg == oedema_label)
+    et_vox = np.sum(seg == enhancing_label)
 
     total_vox = ncr_vox + ed_vox + et_vox
 
     # convert to mL
     ncr_vol_ml = ncr_vox * voxel_volume_ml
-    ed_vol_ml  = ed_vox  * voxel_volume_ml
-    et_vol_ml  = et_vox  * voxel_volume_ml
+    ed_vol_ml = ed_vox * voxel_volume_ml
+    et_vol_ml = et_vox * voxel_volume_ml
     global_vol_ml = total_vox * voxel_volume_ml
-
 
     f9_multifocal = 1
     if num_lesions > 1:
@@ -619,10 +605,9 @@ def get_vasari_features(
     if verbose:
         logger.debug("Number of lesion components: " + str(num_lesions))
 
-    
     if verbose:
         logger.debug("prop oedema " + str(proportion_oedema))
-    
+
     # Old logic: bin proportions
     # proportion_oedema_f = np.nan
     # if proportion_oedema == 0:
@@ -637,7 +622,6 @@ def get_vasari_features(
     # New logic: return float proportions
     proportion_oedema_f = proportion_oedema
 
-
     end_time = time.time()
     time_taken = end_time - start_time
     time_taken_round = np.round(time_taken, 2)
@@ -647,9 +631,6 @@ def get_vasari_features(
     if verbose:
         logger.debug("")
         logger.debug("Complete! Generating output...")
-
-
-
 
     col_names = [
         "Tumor Location",
@@ -674,8 +655,7 @@ def get_vasari_features(
         "ED Volume (mL)",
         "ET Volume (mL)",
         "Total tumor volume (mL)",
-        "Number of lesions", 
-
+        "Number of lesions",
     ]  # 'filename', 'reporter', 'time_taken_seconds', 'F8 Cyst(s)', 'F10 T1/FLAIR Ratio', 'F12 Definition of the Enhancing margin','F13 Definition of the non-enhancing tumour margin','F16 haemorrhage', 'F17 Diffusion','F18 Pial invasion', 'F25 Calvarial modelling', 'COMMENTS']
 
     if merged is not None:
@@ -756,18 +736,16 @@ def get_vasari_features(
         "Enlarged Ventricles": enlarged_ventricles,
         "Region Proportions": region_prop_list,
         "Lesion Sizes APxTVxCC (cm)": lesion_sizes,
-        "NCR Volume (mL)":float(ncr_vol_ml),
+        "NCR Volume (mL)": float(ncr_vol_ml),
         "ED Volume (mL)": float(ed_vol_ml),
         "ET Volume (mL)": float(et_vol_ml),
-        "Total tumor volume (mL)":float(global_vol_ml),
-        "Number of lesions":len(lesion_sizes), 
+        "Total tumor volume (mL)": float(global_vol_ml),
+        "Number of lesions": len(lesion_sizes),
     }
     return result
 
 
-def compute_ap_tv_cc_multifocal(
-    mask_path, include_labels=[1, 2], cm_or_mm="mm", min_dim_thresh_cm=3.0, debug_save_path=None, voxel_sizes=[1.0, 1.0, 1.0]
-):
+def compute_ap_tv_cc_multifocal(mask_path, include_labels=[1, 2], cm_or_mm="mm", min_dim_thresh_cm=3.0, debug_save_path=None, voxel_sizes=[1.0, 1.0, 1.0]):
     """
     Compute AP x TV x CC dimensions for each lesion component.
     Keeps the largest lesion regardless of threshold.

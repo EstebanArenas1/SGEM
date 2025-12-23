@@ -516,9 +516,7 @@ def plots_survival(
             grp = np.where(tmp[x_variable] <= median_val, 0, 1)
 
             try:
-                lr = logrank_test(
-                    tmp.loc[grp == 0, duration_col], tmp.loc[grp == 1, duration_col], tmp.loc[grp == 0, event_col], tmp.loc[grp == 1, event_col]
-                )
+                lr = logrank_test(tmp.loc[grp == 0, duration_col], tmp.loc[grp == 1, duration_col], tmp.loc[grp == 0, event_col], tmp.loc[grp == 1, event_col])
                 p_lr = float(lr.p_value)
             except:
                 p_lr = 1.0
@@ -601,12 +599,7 @@ def plots_survival(
                 cph = CoxPHFitter()
                 cph.fit(tmp[[duration_col, event_col, x_variable]], duration_col=duration_col, event_col=event_col)
                 row = cph.summary.loc[x_variable]
-                stats_text = (
-                    f"HR={row['exp(coef)']:.2f} "
-                    f"[{row['exp(coef) lower 95%']:.2f}, {row['exp(coef) upper 95%']:.2f}]\n"
-                    f"p(Cox)={row['p']:.2e}\n"
-                    f"p(log-rank)={p_lr:.2e}"
-                )
+                stats_text = f"HR={row['exp(coef)']:.2f} " f"[{row['exp(coef) lower 95%']:.2f}, {row['exp(coef) upper 95%']:.2f}]\n" f"p(Cox)={row['p']:.2e}\n" f"p(log-rank)={p_lr:.2e}"
             except:
                 stats_text = f"p(log-rank)={p_lr:.2e}"
 

@@ -36,18 +36,12 @@ if WRAPPER is None:
 #         cmd.append("--cpu")
 #     subprocess.run(cmd, check=True)
 
+
 def synthseg(input_path, output_path, parc=False, robust=False, fast=False, cpu=False, sif=WRAPPER):
     if os.path.exists(output_path):
         return
 
-    cmd = [
-        "apptainer", "exec", "--nv",
-        sif,
-        "python", "/opt/SynthSeg/scripts/commands/SynthSeg_predict.py",
-        "--i", input_path,
-        "--o", output_path
-    ]
-
+    cmd = ["apptainer", "exec", "--nv", sif, "python", "/opt/SynthSeg/scripts/commands/SynthSeg_predict.py", "--i", input_path, "--o", output_path]
 
     if parc:
         cmd.append("--parc")
@@ -76,7 +70,7 @@ def update_tumor_labels(image_array: np.ndarray, label_map: dict):
 
 
 # def merge_tumor_midline_and_anat_masks(tumor_path, synthseg_path, midline_path, save_path, overwrite=False, tumor_type="glioma", ncr_label=1, ed_label=2, et_label=3):
-    
+
 #     if os.path.exists(save_path) and not overwrite:
 #         logger.info(f'Path {save_path} exists, skipping merging of anatomical, midline, and tumor segmentations..')
 #         return
@@ -105,7 +99,7 @@ def update_tumor_labels(image_array: np.ndarray, label_map: dict):
 #     tumor = update_tumor_labels(image_array=tumor, label_map=TUMOR_LABEL_MAPS[tumor_type])
 #     merged[tumor != 0] = tumor[tumor != 0]
 #     merged[midline != 0] = midline[midline != 0]
-#     merged[brainmask == 0] = 0   
+#     merged[brainmask == 0] = 0
 
 #     merged = np.rint(merged).astype(np.uint8)
 #     nib.save(nib.Nifti1Image(merged, affine=tumor_im.affine, header=tumor_im.header), save_path)
@@ -118,14 +112,14 @@ from scipy.ndimage import binary_dilation
 
 # You can keep this mapping global so it's reusable
 SYNTHSEG_LABEL_NAMES = {
-    0:  "background",
-    1:  "empty (reserved for addtl masks like brainmask)",
-    2:  "left cerebral white matter",
-    3:  "left cerebral cortex",
-    4:  "left lateral ventricle",
-    5:  "left inferior lateral ventricle",
-    7:  "left cerebellum white matter",
-    8:  "left cerebellum cortex",
+    0: "background",
+    1: "empty (reserved for addtl masks like brainmask)",
+    2: "left cerebral white matter",
+    3: "left cerebral cortex",
+    4: "left lateral ventricle",
+    5: "left inferior lateral ventricle",
+    7: "left cerebellum white matter",
+    8: "left cerebellum cortex",
     10: "left thalamus",
     11: "left caudate",
     12: "left putamen",
@@ -156,6 +150,7 @@ SYNTHSEG_LABEL_NAMES = {
     # not from SynthSeg itself.
 }
 
+
 def merge_tumor_midline_and_anat_masks(
     tumor_path,
     synthseg_path,
@@ -168,12 +163,12 @@ def merge_tumor_midline_and_anat_masks(
     et_label=3,
 ):
     TUMOR_LABEL_MAPS = {
-        "meningioma":       {ncr_label: 64, ed_label: 65, et_label: 66},  # Meningioma NCR, ED, ET
+        "meningioma": {ncr_label: 64, ed_label: 65, et_label: 66},  # Meningioma NCR, ED, ET
         "pediatric-glioma": {ncr_label: 67, ed_label: 68, et_label: 69},  # Pediatric Glioma NCR, ED, ET
-        "glioma":           {ncr_label: 61, ed_label: 62, et_label: 63},  # Adult Glioma NCR, ED, ET
+        "glioma": {ncr_label: 61, ed_label: 62, et_label: 63},  # Adult Glioma NCR, ED, ET
     }
 
-    #  Load images 
+    #  Load images
     tumor_im = nib.load(tumor_path)
     tumor = tumor_im.get_fdata()
 
@@ -190,32 +185,24 @@ def merge_tumor_midline_and_anat_masks(
         if tt.lower() in str(tumor_path).lower():
             tumor_type = tt
 
-    #  Compute overlaps between tumor and SynthSeg regions 
+    #  Compute overlaps between tumor and SynthSeg regions
     tumor_mask = tumor > 0
     overlapping_label_ids = np.unique(synthseg[tumor_mask]).astype(int)
 
     # optionally drop background and "empty" (0, 1) if you only care about real anatomy
     overlapping_label_ids = [i for i in overlapping_label_ids if i > 1]
 
-    overlapping_region_names = [
-        SYNTHSEG_LABEL_NAMES.get(i, f"label_{i}") for i in overlapping_label_ids
-    ]
+    overlapping_region_names = [SYNTHSEG_LABEL_NAMES.get(i, f"label_{i}") for i in overlapping_label_ids]
 
     drop_keywords = {"white matter", "cortex", "csf"}
-    overlapping_region_names = [
-        name for name in overlapping_region_names
-        if not any(k in name.lower() for k in drop_keywords)
-    ]
+    overlapping_region_names = [name for name in overlapping_region_names if not any(k in name.lower() for k in drop_keywords)]
 
     if os.path.exists(save_path) and not overwrite:
-        logger.info(
-            f'Path {save_path} exists, skipping merging of anatomical, midline, and tumor '
-            f'segmentations..'
-        )
+        logger.info(f"Path {save_path} exists, skipping merging of anatomical, midline, and tumor " f"segmentations..")
         # Still return the overlapping regions even if we skip writing the file
         return overlapping_region_names
 
-    #  Prepare midline and merge 
+    #  Prepare midline and merge
     midline = (midline > 0) * 70
     midline = binary_dilation(midline > 0, iterations=1).astype(np.uint8) * 70
     midline[synthseg == 0] = 0
@@ -229,23 +216,21 @@ def merge_tumor_midline_and_anat_masks(
 
     merged = np.rint(merged).astype(np.uint8)
     nib.save(nib.Nifti1Image(merged, affine=tumor_im.affine, header=tumor_im.header), save_path)
-    logger.info('Merged anatomical, midline, and tumor segmentations successfully!')
+    logger.info("Merged anatomical, midline, and tumor segmentations successfully!")
 
     # Return the *names* of SynthSeg regions overlapped by tumor
     return overlapping_region_names
 
 
-
-
 SYNTHSEG_LABEL_NAMES = {
-    0:  "background",
-    1:  "empty (reserved for addtl masks like brainmask)",
-    2:  "left cerebral white matter",
-    3:  "left cerebral cortex",
-    4:  "left lateral ventricle",
-    5:  "left inferior lateral ventricle",
-    7:  "left cerebellum white matter",
-    8:  "left cerebellum cortex",
+    0: "background",
+    1: "empty (reserved for addtl masks like brainmask)",
+    2: "left cerebral white matter",
+    3: "left cerebral cortex",
+    4: "left lateral ventricle",
+    5: "left inferior lateral ventricle",
+    7: "left cerebellum white matter",
+    8: "left cerebellum cortex",
     10: "left thalamus",
     11: "left caudate",
     12: "left putamen",
@@ -275,7 +260,6 @@ SYNTHSEG_LABEL_NAMES = {
     # 61–70 are tumor + midline, but those come from the merged mask,
     # not from SynthSeg itself.
 }
-
 
 
 """
