@@ -41,7 +41,7 @@ def synthseg(input_path, output_path, parc=False, robust=False, fast=False, cpu=
     if os.path.exists(output_path):
         return
 
-    cmd = ["apptainer", "exec", "--nv", sif, "python", "/opt/SynthSeg/scripts/commands/SynthSeg_predict.py", "--i", input_path, "--o", output_path]
+    cmd = ["apptainer", "exec", "--nv", sif, "python", "/opt/SynthSeg/scripts/commands/SynthSeg_predict.py", "--i", os.path.realpath(input_path), "--o", os.path.realpath(output_path)]
 
     if parc:
         cmd.append("--parc")

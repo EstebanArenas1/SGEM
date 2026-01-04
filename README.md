@@ -42,8 +42,18 @@ The framework consists of four components:
 -  **[llm_report_generation](./btreport/llm_report_generation/)** — LLM synthesis of structured radiology reports grounded in deterministic features.
 
 ![-----------------------------------------------------](assets/purpleline.png)
+## Example findings generated with BTReport
+<p align="center">
+<img src=assets/example_subject.png />
+</p>
 
+**MASS EFFECT & VENTRICLES:**  
+There is an approximately 10 mm leftward midline shift at the level of the fourth ventricle. The right lateral ventricle, including the inferior horn, is effaced by tumor, whereas the left lateral ventricle is enlarged, producing marked ventricular asymmetry. No tonsillar herniation is seen, and the basal cisterns remain patent.
 
+**BRAIN / ENHANCEMENT:**  
+A solitary, markedly enhancing lesion centered in the right cortex involving the parietal, occipital, and temporal lobes measures 7.1 × 4.9 × 5.9 cm (AP × TV × CC). The enhancing rim is thick (>3 mm). The lesion demonstrates ependymal invasion of the right lateral ventricle and extends into deep right-sided structures, including the thalamus, caudate, putamen, pallidum, and hippocampus, with associated deep white matter infiltration. Multiple small enhancing satellite nodules are present adjacent to the main mass. Approximately 6% of the lesion is non-enhancing necrotic tissue. A large surrounding FLAIR-hyperintense region consistent with vasogenic edema comprises the majority of the lesion volume (66%) but does not cross the midline. The enhancing component remains confined to the right side.
+
+![-----------------------------------------------------](assets/purpleline.png)
 
 
 ## Installation (~1.5 hours)
@@ -137,16 +147,6 @@ python3 -m btreport.eval_json \
   --do_details
 
 ```
-
-![-----------------------------------------------------](assets/purpleline.png)
-
-## Example findings generated with BTReport
-
-**MASS EFFECT & VENTRICLES:**  
-There is an approximately 10 mm leftward midline shift at the level of the fourth ventricle. The right lateral ventricle, including the inferior horn, is effaced by tumor, whereas the left lateral ventricle is enlarged, producing marked ventricular asymmetry. No tonsillar herniation is seen, and the basal cisterns remain patent.
-
-**BRAIN / ENHANCEMENT:**  
-A solitary, markedly enhancing lesion centered in the right cortex involving the parietal, occipital, and temporal lobes measures 7.1 × 4.9 × 5.9 cm (AP × TV × CC). The enhancing rim is thick (>3 mm). The lesion demonstrates ependymal invasion of the right lateral ventricle and extends into deep right-sided structures, including the thalamus, caudate, putamen, pallidum, and hippocampus, with associated deep white matter infiltration. Multiple small enhancing satellite nodules are present adjacent to the main mass. Approximately 6% of the lesion is non-enhancing necrotic tissue. A large surrounding FLAIR-hyperintense region consistent with vasogenic edema comprises the majority of the lesion volume (66%) but does not cross the midline. The enhancing component remains confined to the right side.
 
 ![-----------------------------------------------------](assets/purpleline.png)
 

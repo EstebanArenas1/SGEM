@@ -568,11 +568,24 @@ def midline_distance_fill(
     return summary
 
 
-def midline_shift_3d(tmp_dir, tumor, ncr_label=1, ed_label=2, et_label=4, overwrite=False):
-    deformed_midline_path = os.path.join(tmp_dir, "patient_midline.nii.gz")
-    ideal_midline_path = os.path.join(tmp_dir, "ideal_midline.nii.gz")
-    midline_distances_path = os.path.join(tmp_dir, "midline_distances.nii.gz")
-    anat_seg_path = os.path.join(tmp_dir, "MNI152_in_subject_space_synthseg.nii.gz")
+# def midline_shift_3d(tmp_dir, tumor, ncr_label=1, ed_label=2, et_label=4, overwrite=False):
+#     deformed_midline_path = os.path.join(tmp_dir, "patient_midline.nii.gz")
+#     ideal_midline_path = os.path.join(tmp_dir, "ideal_midline.nii.gz")
+#     midline_distances_path = os.path.join(tmp_dir, "midline_distances.nii.gz")
+#     anat_seg_path = os.path.join(tmp_dir, "MNI152_in_subject_space_synthseg.nii.gz")
+
+
+def midline_shift_3d(
+    tumor,
+    deformed_midline_path,
+    ideal_midline_path,
+    midline_distances_path,
+    anat_seg_path,
+    ncr_label=1,
+    ed_label=2,
+    et_label=4,
+    overwrite=False,
+):
 
     ideal_midline_from_deformed(
         deformed_midline_path=deformed_midline_path,
@@ -604,7 +617,7 @@ def midline_shift_3d(tmp_dir, tumor, ncr_label=1, ed_label=2, et_label=4, overwr
 
     metadata = get_level_of_midline_shift(metadata, distances_path=midline_distances_path, anat_seg_path=anat_seg_path)
 
-    logger.info(f"* Finished processing midline shift! Saved results to {tmp_dir}")
+    logger.info(f"* Finished processing midline shift! Saved results to {os.path.dirname(midline_distances_path)}")
 
     return metadata
 

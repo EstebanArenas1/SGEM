@@ -11,30 +11,33 @@ logger = get_logger("batchgen")
 def main():
     parser = argparse.ArgumentParser(description="Run generate_report.py on ALL subject folders inside a directory.")
 
-    parser.add_argument("--root_folder", type=str, required=True, help="Path containing many subject subfolders.")
+    parser.add_argument("--save_dir", type=str, required=True, help="Path to save results.")
+
+    root='/gscratch/kurtlab/brats2023/data/brats-gli/ASNR-MICCAI-BraTS2023-GLI-Challenge-TrainingData'
 
     parser.add_argument("--clear_tmp", action="store_true")
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--ncr_label", type=int, default=1)
     parser.add_argument("--ed_label", type=int, default=2)
-    parser.add_argument("--et_label", type=int, default=4)
+    parser.add_argument("--et_label", type=int, default=3)
     parser.add_argument("--llm", type=str, default="gpt-oss:120b")
     parser.add_argument("--eval", action="store_true", help="Running evaluation after generation.")
 
     args = parser.parse_args()
 
-    root = os.path.realpath(args.root_folder)
+    save_dir = os.path.realpath(args.save_dir)
     llm = args.llm
 
-    generate_script = "btreport.generate_report"
+    generate_script = "btreport.generate_brats_reports"
 
     for entry in sorted(os.listdir(root)):
-        subject_dir = os.path.join(root, entry)
+        subject_dir = os.path.join(save_dir, entry)
+        paths = build_subject_paths(entry)
 
-        if not os.path.isdir(subject_dir):
+        if not os.path.isdir(os.path.join(root, entry)):
             continue  # skip files
 
-        logger.info(f"\n=== Processing {subject_dir} ===")
+        logger.info(f"\n=== Processing {entry} ===")
 
         cmd = [
             "python3",
@@ -52,6 +55,10 @@ def main():
             llm,
         ]
 
+        for key, value in paths.items():
+            if value is not None:
+                cmd.extend([f"--{key}", value])
+
         if args.clear_tmp:
             cmd.append("--clear_tmp")
         if args.overwrite:
@@ -60,12 +67,54 @@ def main():
         subprocess.run(cmd, check=True)
 
         update_merged_reports(
-            root_dir=root,
+            root_dir=save_dir,
             subject_id=entry,
             llm=llm,
         )
-
     logger.info("\nFinished processing all subjects.")
+
+
+def build_subject_paths(subject_id):
+    """
+    Build external artifact paths for a subject, assuming a shared directory layout.
+    """
+    base_brats = "/gscratch/kurtlab/brats2023/data"
+    base_mni_subj = "/gscratch/kurtlab/brats2023/data/MNI152_IN_SUBJECT_SPACE"
+    base_mni = "/gscratch/kurtlab/brats2023/data/MNI152"
+    base_midline = "/gscratch/kurtlab/brats2023/data/midline"
+    base_synthseg = "/gscratch/scrubbed/juampablo/MNI152_IN_SUBJECT_SPACE/synthseg/brats-gli"
+
+    subj_rel = f"brats-gli/ASNR-MICCAI-BraTS2023-GLI-Challenge-TrainingData/{subject_id}"
+
+    return {
+        "t1_path": os.path.join(
+            base_brats, subj_rel, f"{subject_id}-t1n.nii.gz"
+        ),
+        "tumor_path": os.path.join(
+            base_brats, subj_rel, f"{subject_id}-seg.nii.gz"
+        ),
+        "MNI_in_subject": os.path.join(
+            base_mni_subj, "moved", subj_rel, f"{subject_id}-t1n.nii.gz"
+        ),
+        "MNI_in_subject_transform": os.path.join(
+            base_mni_subj, "transforms", subj_rel, f"{subject_id}-t1n.nii.gz"
+        ),
+        "subject_in_MNI": os.path.join(
+            base_mni, subj_rel, f"{subject_id}-t1n.nii.gz"
+        ),
+        "subject_in_MNI_transform": os.path.join(
+            base_mni, "transforms", subj_rel, f"{subject_id}-t1n.nii.gz"
+        ),
+        "tumorseg_in_MNI": os.path.join(
+            base_mni, subj_rel, f"{subject_id}-seg.nii.gz"
+        ),
+        "patient_midline": os.path.join(
+            base_midline, subj_rel, "patient_midline.nii.gz"
+        ),
+        "anatseg": os.path.join(
+            base_synthseg, f"{subject_id}.nii.gz"
+        ),
+    }
 
 
 def update_merged_reports(root_dir, subject_id, llm, real_report_key="Clinical Report", output_filename="merged_reports_btreport.json", subject_report_filename="patient_metadata_btreport.json"):
@@ -91,9 +140,9 @@ def update_merged_reports(root_dir, subject_id, llm, real_report_key="Clinical R
     bt_generated_key = f"BTReport Generated Report ({llm})"
     predicted_key = f"Predicted Report ({llm})"
 
-    if real_report_key not in subject_btreport:
-        logger.info(f"Merge error: '{real_report_key}' missing in {subject_report_path}")
-        return
+    # if real_report_key not in subject_btreport:
+    #     logger.info(f"Merge error: '{real_report_key}' missing in {subject_report_path}")
+    #     return
 
     if bt_generated_key not in subject_btreport:
         logger.info(f"Merge error: '{bt_generated_key}' missing in {subject_report_path}")
@@ -103,7 +152,7 @@ def update_merged_reports(root_dir, subject_id, llm, real_report_key="Clinical R
         merged[subject_id] = {}
 
     # Store ground truth
-    merged[subject_id][real_report_key] = subject_btreport[real_report_key]
+    # merged[subject_id][real_report_key] = subject_btreport[real_report_key]
 
     # Store prediction
     merged[subject_id][predicted_key] = subject_btreport[bt_generated_key]
@@ -119,3 +168,14 @@ def update_merged_reports(root_dir, subject_id, llm, real_report_key="Clinical R
 
 if __name__ == "__main__":
     main()
+    # subs=sorted(os.listdir('/gscratch/kurtlab/brats2023/data/brats-gli/ASNR-MICCAI-BraTS2023-GLI-Challenge-TrainingData'))
+
+    # subs = subs[0:10]
+
+    # for sub in subs:
+
+    #     paths = build_subject_paths(sub)
+
+    #     for k, v in paths.items():
+    #         status = "OK" if os.path.exists(v) else "MISSING"
+    #         print(f"{k:30s} {status}  {v}")

@@ -1,5 +1,6 @@
 import logging
 
+
 def get_logger(subject="—"):
     """
     Installs a global logging factory that injects subject ID
@@ -21,4 +22,3 @@ def get_logger(subject="—"):
     logging.setLogRecordFactory(factory)
 
     return logging.getLogger("btreport")  # optional default logger
-
