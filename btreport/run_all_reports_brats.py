@@ -30,6 +30,12 @@ def main():
 
     generate_script = "btreport.generate_brats_reports"
 
+    merged_path = os.path.join(save_dir, "merged_reports_btreport.json")
+    merged = {}
+    if os.path.exists(merged_path):
+        with open(merged_path, "r") as f:
+            merged = json.load(f)
+
     for entry in sorted(os.listdir(root)):
         subject_dir = os.path.join(save_dir, entry)
         paths = build_subject_paths(entry)
@@ -38,6 +44,12 @@ def main():
             continue  # skip files
 
         logger.info(f"\n=== Processing {entry} ===")
+
+        predicted_key = f"Predicted Report ({llm})"
+
+        if (not args.overwrite and entry in merged and predicted_key in merged[entry]):
+            logger.info(f"Skipping {entry} [{llm}] — already merged.")
+            continue
 
         cmd = [
             "python3",
@@ -168,14 +180,3 @@ def update_merged_reports(root_dir, subject_id, llm, real_report_key="Clinical R
 
 if __name__ == "__main__":
     main()
-    # subs=sorted(os.listdir('/gscratch/kurtlab/brats2023/data/brats-gli/ASNR-MICCAI-BraTS2023-GLI-Challenge-TrainingData'))
-
-    # subs = subs[0:10]
-
-    # for sub in subs:
-
-    #     paths = build_subject_paths(sub)
-
-    #     for k, v in paths.items():
-    #         status = "OK" if os.path.exists(v) else "MISSING"
-    #         print(f"{k:30s} {status}  {v}")

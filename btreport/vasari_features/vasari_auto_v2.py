@@ -220,6 +220,10 @@ class ExtractVASARI:
         }
         regions = [name for name, _ in region_prop_list]
 
+
+        if len(regions) == 0: # fallback, if no regions have greater than 10percent proportion, just choose the largest region.
+            regions = [vols.iloc[0].ROI]
+
         if len(regions) == 1:
             tumor_location = regions[0]
 
