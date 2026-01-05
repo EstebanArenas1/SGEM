@@ -153,7 +153,7 @@ python3 -m btreport.eval_json \
 ## BTReport-BraTS23 Dataset
  We provide a companion dataset which augments BraTS'23 imaging with these features to further research in neuro-oncology report generation.
  
- The dataset contains reports generated with gpt-oss:120b and llama3:70b, and can be found in `./btreport_brats23.json`.
+ The dataset contains reports generated with gpt-oss:120b and llama3:70b, and can be found in `btreport_brats23.json`.
 
 
 
