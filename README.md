@@ -2,7 +2,7 @@
 
 
 # BTReport 
-[arXiv](./assets/MIDL_2026_BTReport__Latest_.pdf) | [BibTeX](#bibtex)
+[arXiv](./assets/MIDL_2026_BTReport__Latest_.pdf) | [BibTeX](#bibtex) | [Accompanying Dataset](btreport_brats23.json)
 
 <!-- [![arXiv](https://img.shields.io/badge/arXiv-2112.1075-b31b1b.svg)](https://arxiv.org/abs/2112.1075)  -->
 
@@ -153,7 +153,7 @@ python3 -m btreport.eval_json \
 ## BTReport-BraTS23 Dataset
  We provide a companion dataset which augments BraTS'23 imaging with these features to further research in neuro-oncology report generation.
  
- The dataset contains reports generated with gpt-oss:120b and llama3:70b, and can be found in `btreport_brats23.json`.
+ The dataset contains reports generated with gpt-oss:120b and llama3:70b, and can be found in [`btreport_brats23.json`](btreport_brats23.json).
 
 For each subject, entries in the .json look like:
 
