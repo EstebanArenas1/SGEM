@@ -33,7 +33,7 @@ Key modifications include:
 
 ## VASARI-auto
 
-This implementation is based on [VASARI-auto](#VASARI-auto) by James Ruffle
+This implementation is based on VASARI-auto by James Ruffle
 (UCL Queen Square Institute of Neurology) and is distributed under the Apache 2.0 License. If you use this code, please cite the original work.
 
  >[VASARI-auto: Equitable, efficient, and economical featurisation of glioma MRI](https://pmc.ncbi.nlm.nih.gov/articles/PMC11415871/)  
