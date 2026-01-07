@@ -43,7 +43,7 @@ This implementation is based on VASARI-auto[^1] by James Ruffle
   NeuroImage: Clinical, 44, 103668
 
   [Full text](https://pmc.ncbi.nlm.nih.gov/articles/PMC11415871/) ·
-  [GitHub repository](https://github.com/james-ruffle/vasari-auto)
+  [GitHub repository](https://github.com/jamesruffle/vasari-auto)
 
 
 [^1]: Ruffle, James K., et al. "VASARI-auto: Equitable, efficient, and economical featurisation of glioma MRI." NeuroImage: Clinical 44 (2024): 103668.
