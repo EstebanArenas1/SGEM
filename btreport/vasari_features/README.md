@@ -37,7 +37,7 @@ This implementation is based on VASARI-auto[^1] by James Ruffle
 (UCL Queen Square Institute of Neurology) and is distributed under the Apache 2.0 License. If you use this code, please cite the original work.
 
 
-[^1]: [VASARI-auto: Equitable, efficient, and economical featurisation of glioma MRI](https://pmc.ncbi.nlm.nih.gov/articles/PMC11415871/)  
+ >[VASARI-auto: Equitable, efficient, and economical featurisation of glioma MRI](https://pmc.ncbi.nlm.nih.gov/articles/PMC11415871/)  
   James K. Ruffle, Samia Mohinta, Kelly Pegoretti Baruteau, Rebekah Rajiah, Faith Lee,  
   Sebastian Brandner, Parashkev Nachev, and Harpreet Hyare  
   NeuroImage: Clinical, 44, 103668
@@ -46,6 +46,4 @@ This implementation is based on VASARI-auto[^1] by James Ruffle
   [GitHub repository](https://github.com/james-ruffle/vasari-auto)
 
 
-
-<!-- 
-[^1]: Ruffle, James K., et al. "VASARI-auto: Equitable, efficient, and economical featurisation of glioma MRI." NeuroImage: Clinical 44 (2024): 103668. -->
+[^1]: Ruffle, James K., et al. "VASARI-auto: Equitable, efficient, and economical featurisation of glioma MRI." NeuroImage: Clinical 44 (2024): 103668.
