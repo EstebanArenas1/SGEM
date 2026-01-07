@@ -2,7 +2,7 @@
 
 
 # BTReport 
-[arXiv](./assets/MIDL_2026_BTReport__Latest_.pdf) | [BibTeX](./assets/MIDL_2026_BTReport__Latest_.pdf)
+[arXiv](./assets/MIDL_2026_BTReport__Latest_.pdf) | [BibTeX](#bibtex)
 
 <!-- [![arXiv](https://img.shields.io/badge/arXiv-2112.1075-b31b1b.svg)](https://arxiv.org/abs/2112.1075)  -->
 
