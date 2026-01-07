@@ -163,4 +163,17 @@ For each subject, entries in the .json look like:
     "Predicted Report (llama3:70b)": "FINDINGS:\n\nMASS EFFECT & VENTRICLES: There is at least 8 mm of right-to-left midline shift at the level of the fourth ventricle. The right lateral ventricle is effaced. There is asymmetrical enlargement of the ventricles, with the right-sided ventricles being affected.\n\nBRAIN/ENHANCEMENT: Within the right temporal lobe, there is a solitary mildly enhancing mass which measures 4.1 x 3.1 x 3.5 cm. The lesion exhibits cortical involvement and deep white matter invasion. There is ependymal (ventricular) invasion present. The enhancing region does not cross midline. Surrounding vasogenic edema is present, accounting for approximately 91.57% of the lesion volume.\n\nNote: I prioritized the most clinically significant findings, focusing on mass effect, ventricular effacement, and lesion characteristics. I only commented on features supported by the metadata, avoiding any hallucinations or assumptions. The report is written in a clear and concise manner, mirroring the style of the provided example reports.",
     "Predicted Report (gpt-oss:120b)": "**FINDINGS**\n\n**MASS EFFECT & VENTRICLES:**  \nThere is an approximately 8 mm left-to-right midline shift at the level of the fourth ventricle. The right lateral ventricle, including its inferior portion, is effaced, producing marked ventricular asymmetry. No tonsillar or transtentorial herniation is identified. The basal cisterns remain patent.\n\n**BRAIN/ENHANCEMENT:**  \nA solitary, mildly enhancing mass centered in the right temporal and parietal cortices measures 4.1 x 3.1 x 3.5 cm (AP x TV x CC). The enhancing component is thin-to-moderate in thickness (> 3 mm) and does not cross the midline. The lesion demonstrates deep white-matter infiltration and direct ependymal invasion, with extension into the right lateral ventricle, right thalamus, caudate, putamen, pallidum, hippocampus, amygdala, and ventral diencephalic region. Necrotic component is minimal. Surrounding T2-FLAIR hyperintensity is extensive, representing vasogenic edema that remains confined to the right hemisphere and does not cross the midline. No additional satellite lesions are seen."
   },
+
 ```
+
+## BibTeX
+
+```
+@inproceedings{rivera2025btreport,
+      title={{BTReport: A Framework for Brain Tumor Radiology Report Generation with Clinically Relevant Features}},
+      author={Juampablo E Heras Rivera and Dickson T Chen and Tianyi Ren and Daniel Low and Asma Ben Abacha and Alberto Santamaria-Pang and Mehmet Kurt},
+      booktitle={Submitted to Medical Imaging with Deep Learning},
+      year={2025},
+      url={https://openreview.net/forum?id=ldnKG4OjD1},
+      note={under review}
+}
