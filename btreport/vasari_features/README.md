@@ -6,15 +6,15 @@ anatomical relationships between glioblastoma (GBM) and clinically relevant brai
 These relationships are well established in the literature, routinely described in neuroradiology
 reports, and actively used by neurosurgeons to assess surgical candidacy.
 
-In this repo, we use a modified variant of VASARI-auto[^1],
+In this repo, we use a modified variant of [VASARI-auto](#VASARI-auto),
 an automated VASARI labeling pipeline that has been validated as "non-inferior to expert
 radiologist annotations" while substantially reducing inter-rater variability. Our implementation
 integrates subject-space anatomical and midline segmentations derived earlier in the BTReport
 pipeline, enabling more accurate and anatomically faithful feature estimation. Additionally, we make additional modifications to better fit the needs of this project, outlined in the next section.
 
-## Modifications to VASARI-auto[^1] for BTReport
+## Modifications to [VASARI-auto](#VASARI-auto) for BTReport
 
-This codebase is derived from the original VASARI-auto[^1] implementation and has been extended
+This codebase is derived from the original [VASARI-auto](#VASARI-auto) implementation and has been extended
 to better support large-scale, automated feature extraction from BraTS-style datasets.
 Key modifications include:
 
@@ -31,11 +31,10 @@ Key modifications include:
 - Conversion of proportion-based features to continuous floating-point values
 .
 
-## Attribution and Licensing
+## VASARI-auto
 
-This implementation is based on VASARI-auto[^1] by James Ruffle
+This implementation is based on [VASARI-auto](#VASARI-auto) by James Ruffle
 (UCL Queen Square Institute of Neurology) and is distributed under the Apache 2.0 License. If you use this code, please cite the original work.
-
 
  >[VASARI-auto: Equitable, efficient, and economical featurisation of glioma MRI](https://pmc.ncbi.nlm.nih.gov/articles/PMC11415871/)  
   James K. Ruffle, Samia Mohinta, Kelly Pegoretti Baruteau, Rebekah Rajiah, Faith Lee,  
@@ -46,4 +45,3 @@ This implementation is based on VASARI-auto[^1] by James Ruffle
   [GitHub repository](https://github.com/jamesruffle/vasari-auto)
 
 
-[^1]: Ruffle, James K., et al. "VASARI-auto: Equitable, efficient, and economical featurisation of glioma MRI." NeuroImage: Clinical 44 (2024): 103668.
