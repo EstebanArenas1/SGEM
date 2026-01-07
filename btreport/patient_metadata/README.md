@@ -19,6 +19,9 @@ BTReport.
 
 ## Kaplan–Meier Plots
 
+Kaplan–Meier curves visualize time-to-event outcomes (e.g., survival), with time on the x-axis and the estimated survival probability on the y-axis. Steeper declines indicate higher event rates and poorer prognosis, while flatter regions reflect more stable survival. When comparing multiple curves, similar or parallel shapes suggest comparable survival experiences, whereas diverging or crossing curves indicate differences between groups. Survival probabilities at specific time points can be read by tracing vertically from the time of interest to the curve and horizontally to the y-axis. For a simple tutorial on KM plots take a look at this[^1].
+[^1]: https://numiqo.com/tutorial/kaplan-meier-curve
+
 The `assets/` directory contains several KM survival plots illustrating how
 different patient characteristics relate to survival_days.  The figure below shows Kaplan–Meier Plots over all patient features collected, both significant (p < 0.05) and non-significant (p > 0.05).
 
