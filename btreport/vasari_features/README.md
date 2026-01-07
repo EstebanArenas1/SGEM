@@ -34,22 +34,18 @@ Key modifications include:
 ## Attribution and Licensing
 
 This implementation is based on VASARI-auto[^1] by James Ruffle
-(UCL Queen Square Institute of Neurology) and is distributed under the Apache 2.0 License.
+(UCL Queen Square Institute of Neurology) and is distributed under the Apache 2.0 License. If you use this code, please cite the original work.
 
-If you use this code, please cite the original work:
 
-- Original repository: https://github.com/james-ruffle/vasari-auto
+[^1]: [VASARI-auto: Equitable, efficient, and economical featurisation of glioma MRI](https://pmc.ncbi.nlm.nih.gov/articles/PMC11415871/)  
+  James K. Ruffle, Samia Mohinta, Kelly Pegoretti Baruteau, Rebekah Rajiah, Faith Lee,  
+  Sebastian Brandner, Parashkev Nachev, and Harpreet Hyare  
+  NeuroImage: Clinical, 44, 103668
 
-```
-@article{ruffle2024vasari,
-  title={VASARI-auto: Equitable, efficient, and economical featurisation of glioma MRI},
-  author={Ruffle, James K and Mohinta, Samia and Baruteau, Kelly Pegoretti and Rajiah, Rebekah and Lee, Faith and Brandner, Sebastian and Nachev, Parashkev and Hyare, Harpreet},
-  journal={NeuroImage: Clinical},
-  volume={44},
-  pages={103668},
-  year={2024},
-  publisher={Elsevier}
-}
-```
+  [Full text](https://pmc.ncbi.nlm.nih.gov/articles/PMC11415871/) ·
+  [GitHub repository](https://github.com/james-ruffle/vasari-auto)
 
-[^1]: https://numiqo.com/tutorial/kaplan-meier-curve
+
+
+<!-- 
+[^1]: Ruffle, James K., et al. "VASARI-auto: Equitable, efficient, and economical featurisation of glioma MRI." NeuroImage: Clinical 44 (2024): 103668. -->
