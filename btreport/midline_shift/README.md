@@ -1,39 +1,67 @@
 # Midline Shift
 
-Contains scripts and models for 3D midline shift quantification from MRI data:
-- Uses SynthMorph to align a healthy MNI Atlas to a subject's scan
-- Uses transform from Synthmorph to register midline segmentation from MNI152 onto subject
-- Outputs quantitative indicators including midline shift at each slice (in mm) and binary thresholds (>5 mm)
+Midline shift (MLS) is an intracranial pathology characterized by the displacement of brain tissue across the skull’s midsagittal axis. MLS arises as a result of traumatic brain injury or tumor mass effects and is an indirect indicator of elevated intracerebral pressure. Estimation of MLS is done by identifying the axial slice with the largest deviation, as indicated by midline structures such as the septum pellucidum, the third ventricle, the fourth ventricle or the falx cerebri. 
+
+Midline shift estimation is subject to high inter-rater variability as there is not a standard procedure for axial slice level selection. Here, we propose a novel pipeline for MLS estimation based on clinical guidelines, using a deep learning atlas-based segmentation approach.
+
+ Our approach leverages the robust registration capabilities of SynthMorph (Hoffmann et al., 2024) to register hand-annotated midline segmentations from a MNI152 atlas template onto patient T1 scans. These are compared to an “ideal” midline, which is defined by connecting the anterior and posterior points of the falx cerebri for each axial slice. 
+ 
+ By calculating the distance between the ideal and subject midlines at each voxel, we obtain highly-accurate 3D MLS estimations in seconds, giving a more complete picture in comparison to 2D automated or manual annotation methods. Furthermore, this approach has strong zero-shot generalization and can be applied to any MRI or CT scan.
+
+<p align="center">
+<img src=../../assets/mls.png />
+</p>
 
 
+## Pseudocode
+```text
+Input:
+- Subject 3D T1 scan
+- Tumor segmentation mask with necrotic core (NCR), edema (ED),
+  and enhancing tumor (ET) labeled according to the BraTS convention
+- Manually annotated midline mask in MNI152 atlas space
+  (../utils/midline_plane_regressed.nii.gz)
 
-## Setting up Synthmorph
+Steps:
 
-SynthMorph is a great tool for registering arbitrary brain scans to each other, without needing specific preprocessing. SynthMorph is incredibly robust and can do cross-modality (MRI-to-CT) alignment as well. In this project, we use SynthMorph to register T1 scans to the MNI152 Atlas and vice-versa.
+1. Register the MNI152 atlas into subject space
+   - Compute the MNI152-to-subject nonlinear registration using SynthMorph
 
-### 1. Installation
+2. Register the subject scan into MNI152 space
+   - Compute the subject-to-MNI152 nonlinear registration
 
-**Option 1** (takes ~1 hour)  
-Install SynthMorph following the official [instructions](https://hub.docker.com/r/freesurfer/synthmorph). This will pull the image from DockerHub.
+3. Warp the atlas midline mask into subject space
+   - Apply the MNI152-to-subject transform to the atlas midline annotation
 
-**Option 2** (recommended, takes ~20 minutes)  
-Download `synthmorph_4.sif` directly from the provided Google Drive link.  Make sure `synthmorph_4.sif` is in a directory with sufficient space (the image is ~7 GB).
+4. Construct the ideal midline in subject space
+   For each axial slice:
+   - Identify the anterior and posterior points of the falx cerebri
+   - Connect these points with a straight line to define the ideal midline
 
+5. Compare the subject midline to the ideal midline
+   - Compute voxel-wise distances between the two midlines
+   - Produce a dense 3D midline shift map
 
-### 2. Set the $WRAPPER environment variable
-Point to your installed synthmorph.sif with by setting:
+6. Account for tumor crossing the anatomical midline
+   - Split tumor subregions (NCR, ED, ET, NCR+ET) by left/right
+   - Identify the dominant tumor side
+   - If NCR+ET crosses the midline:
+       - Zero midline values within the tumor core
+         (attribute shift to edema only)
+   - Otherwise:
+       - Update the subject midline to follow the tumor boundary
+         opposite the dominant tumor bulk
 
-```shell-session
-export WRAPPER= path/to/synthmorph_4.sif
-```
-or inside Python with:
-```python
-os.environ['WRAPPER'] = 'path/to/synthmorph_4.sif'
-```
+7. Aggregate midline shift metrics
+   - Per-slice signed maximum shift
+   - Mean, median, maximum, and 95th percentile shift
+   - Number of slices with measurable shift
+   - Presence and level of clinically significant midline shift
 
-### 4. Set the working directory of the SynthMorph container
-`SUBJECTS_DIR` sets the working directory of SynthMorph, and you can specify paths relative to it.  If unset, `SUBJECTS_DIR` defaults to your current directory.
+8. Save outputs
+   - 3D midline distance map (NIfTI)
+   - Quantitative summary statistics (JSON)
 
-```shell-session
-export SUBJECTS_DIR=/path/above/your/data
-```
+Output:
+- Dense 3D midline shift estimation in subject space
+- Clinically interpretable midline shift summary metrics
