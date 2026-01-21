@@ -2,7 +2,12 @@
 
 
 # BTReport 
-[arXiv](./assets/MIDL_2026_BTReport__Latest_.pdf) | [BibTeX](#bibtex) | [Accompanying Dataset](#btreport-brats23-dataset) | [Clinical Evaluation Platform](#clinical-evaluation-platform)
+<p align="center">
+    <a href="./assets/MIDL_2026_BTReport__Latest_.pdf">arXiv</a> |
+    <a href="#bibtex">BibTeX</a> |
+    <a href="#btreport-brats23-dataset">Dataset</a> |
+    <a href="#clinical-evaluation-platform">Clinical Evaluation Platform</a>
+</p>
 
 <!-- [![arXiv](https://img.shields.io/badge/arXiv-2112.1075-b31b1b.svg)](https://arxiv.org/abs/2112.1075)  -->
 
