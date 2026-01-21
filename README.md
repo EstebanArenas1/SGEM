@@ -175,7 +175,18 @@ For each subject, entries in the .json look like:
 ## Clinical Evaluation Platform
 https://github.com/user-attachments/assets/00887ae6-b4be-43b7-9c71-7c4db8572433
 
-We developed an evaluation platform to receive feedback from radiologists in future iterations of this project. The platform allows the radiologist to view the 4 BraTS MRI imaging sequences (T1n, T1c, T2w, T2-FLAIR), measure  quantities like midline shift. Then after they have become familiar with the imaging they are presented with four randomly ordered synthetically-generated reports. The radiologists are asked a series of multiple-choice and Likert-scale questions assessing report quality, rate of hallucinations and completeness of the provided reports. Finally, radiologists are asked to rank the reports from most useful to least useful and optionally provide additional comments. All responses are saved directly to a secure server.
+We developed an evaluation platform to collect radiologist feedback for future iterations of this project. The platform consists of an interactive image viewer pane followed by a structured questionnaire.
+
+The viewer pane supports:
+- Multi-view inspection of the four BraTS MRI sequences (T1n, T1c, T2w, T2-FLAIR)
+- Overlay of the three-region tumor segmentation mask
+- Visualization of ideal and deformed subject midlines for midline-shift assessment
+- 2D in-plane distance measurement
+
+After becoming familiar with the patient’s imaging, radiologists are presented with four synthetically generated reports in random order. They complete a series of multiple-choice and Likert-scale questions assessing report quality, hallucinations, and completeness.
+
+Finally, radiologists rank the reports from most useful to least useful and may optionally provide free-text comments. All responses are stored directly on a secure server.
+
 
 
 Check out the platform at: [https://clinical-evaluation-btreport.onrender.com/](https://clinical-evaluation-btreport.onrender.com/)
