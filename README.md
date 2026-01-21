@@ -2,7 +2,7 @@
 
 
 # BTReport 
-[arXiv](./assets/MIDL_2026_BTReport__Latest_.pdf) | [BibTeX](#bibtex) | [Accompanying Dataset](#btreport-brats23-dataset)
+[arXiv](./assets/MIDL_2026_BTReport__Latest_.pdf) | [BibTeX](#bibtex) | [Accompanying Dataset](#btreport-brats23-dataset) | [Clinical Evaluation Platform](#clinical-evaluation-platform)
 
 <!-- [![arXiv](https://img.shields.io/badge/arXiv-2112.1075-b31b1b.svg)](https://arxiv.org/abs/2112.1075)  -->
 
@@ -165,6 +165,19 @@ For each subject, entries in the .json look like:
   },
 
 ```
+
+
+## Clinical Evaluation Platform
+https://github.com/user-attachments/assets/00887ae6-b4be-43b7-9c71-7c4db8572433
+
+We developed an evaluation platform to receive feedback from radiologists in future iterations of this project. The platform allows the radiologist to view the 4 BraTS MRI imaging sequences (T1n, T1c, T2w, T2-FLAIR), measure  quantities like midline shift. Then after they have become familiar with the imaging they are presented with four randomly ordered synthetically-generated reports. The radiologists are asked a series of multiple-choice and Likert-scale questions assessing report quality, rate of hallucinations and completeness of the provided reports. Finally, radiologists are asked to rank the reports from most useful to least useful and optionally provide additional comments. All responses are saved directly to a secure server.
+
+
+Check out the platform at: [https://clinical-evaluation-btreport.onrender.com/](https://clinical-evaluation-btreport.onrender.com/)
+
+> [!NOTE]  
+> The clinical evaluation platform takes around 5 minutes to load all necessary components after first opening.
+
 
 ## BibTeX
 
