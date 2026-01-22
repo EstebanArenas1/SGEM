@@ -98,9 +98,7 @@ See [INSTALL.md](docs/INSTALL.md) for full installation instructions on HPC syst
 
 * On a GPU allocation, start the Ollama server in the background (e.g., within a detached [tmux](https://hamvocke.com/blog/a-quick-and-easy-guide-to-tmux/) session).
   ```bash
-  tmux new -t ollama
-  python3 -m btreport.ollama_server start-ollama --gpus 0,1
-  Ctrl-b d
+  tmux new -d -s ollama3 "python3 -m btreport.ollama_server start-ollama --gpus 0,1"
   ```
 
 
