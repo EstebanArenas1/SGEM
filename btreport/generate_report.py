@@ -54,12 +54,14 @@ def main(args: argparse.Namespace):
 
     tum_in_mni = join(tmp_dir, "tumor_seg_in_MNI152_space.nii.gz")
 
-    midline_out = join(tmp_dir, "patient_midline.nii.gz")
+    patient_midline = join(tmp_dir, "patient_midline.nii.gz")
+    ideal_midline = join(tmp_dir, "ideal_midline.nii.gz")
+    midline_distances = join(tmp_dir, "midline_distances.nii.gz")
 
     logger.info(f"** [0/4] Starting registration steps...")
     register.register_mni_to_subject(fixed=t1_path, moved=mni_in_subj, transform=mni_tfm, overwrite=args.overwrite)  # register MNI152 to subject space
     register.register_to_mni(moving=t1_path, moved=sub_in_mni, transform=sub_tfm, overwrite=args.overwrite)  # register T1 to MNI152 space
-    register.register_midline_to_subject(moved=midline_out, transform=mni_tfm, overwrite=args.overwrite)  # register MNI152 midline to subject space using mni_tfm
+    register.register_midline_to_subject(moved=patient_midline, transform=mni_tfm, overwrite=args.overwrite)  # register MNI152 midline to subject space using mni_tfm
     register.apply_transform(moving=tumor_path, moved=tum_in_mni, transform=sub_tfm, is_seg=True)  # register tumor mask to MNI152 space using sub_tfm
     logger.info(f"* Finished registration steps!")
 
@@ -73,7 +75,7 @@ def main(args: argparse.Namespace):
     overlap_regions = anat_segmentation.merge_tumor_midline_and_anat_masks(
         synthseg_path=anatseg,
         tumor_path=tumor_path,
-        midline_path=midline_out,
+        midline_path=patient_midline,
         save_path=merged_seg,
         ncr_label=args.ncr_label,
         ed_label=args.ed_label,
@@ -87,7 +89,12 @@ def main(args: argparse.Namespace):
 
     # Extract midline shift features
     logger.info(f"** [2/4] Starting midline shift processing...")
-    midline_summary = midline_shift_3d(tmp_dir=tmp_dir, tumor=tumor_path, ncr_label=args.ncr_label, ed_label=args.ed_label, et_label=args.et_label, overwrite=args.overwrite)
+    midline_summary = midline_shift_3d(tumor=tumor_path, 
+                                        deformed_midline_path=patient_midline,
+                                        ideal_midline_path=ideal_midline,
+                                        midline_distances_path=midline_distances,
+                                        anat_seg_path=anatseg,
+                                        ncr_label=args.ncr_label, ed_label=args.ed_label, et_label=args.et_label, overwrite=args.overwrite)
     metadata.update(midline_summary)
 
     # Extract VASARI features
