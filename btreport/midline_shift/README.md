@@ -27,22 +27,19 @@ Steps:
 1. Register the MNI152 atlas into subject space
    - Compute the MNI152-to-subject nonlinear registration using SynthMorph
 
-2. Register the subject scan into MNI152 space
-   - Compute the subject-to-MNI152 nonlinear registration
-
-3. Warp the atlas midline mask into subject space
+2. Warp the atlas midline mask into subject space
    - Apply the MNI152-to-subject transform to the atlas midline annotation
 
-4. Construct the ideal midline in subject space
+3. Construct the ideal midline in subject space
    For each axial slice:
    - Identify the anterior and posterior points of the falx cerebri
    - Connect these points with a straight line to define the ideal midline
 
-5. Compare the subject midline to the ideal midline
+4. Compare the subject midline to the ideal midline
    - Compute voxel-wise distances between the two midlines
    - Produce a dense 3D midline shift map
 
-6. Account for tumor crossing the anatomical midline
+5. Account for tumor crossing the anatomical midline
    - Split tumor subregions (NCR, ED, ET, NCR+ET) by left/right
    - Identify the dominant tumor side
    - If NCR+ET crosses the midline:
@@ -52,13 +49,13 @@ Steps:
        - Update the subject midline to follow the tumor boundary
          opposite the dominant tumor bulk
 
-7. Aggregate midline shift metrics
+6. Aggregate midline shift metrics
    - Per-slice signed maximum shift
    - Mean, median, maximum, and 95th percentile shift
    - Number of slices with measurable shift
    - Presence and level of clinically significant midline shift
 
-8. Save outputs
+7. Save outputs
    - 3D midline distance map (NIfTI)
    - Quantitative summary statistics (JSON)
 
