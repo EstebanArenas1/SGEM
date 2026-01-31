@@ -199,16 +199,16 @@ def interpolate_midline_rows(midline_path, t1_path, out_path, plane_axis=2, inte
     logger.info(f"- Filled holes in midline, saved to {out_path}")
 
 
-def ideal_midline_from_deformed(deformed_midline_path, ideal_midline_path, overwrite=False, label=1, fill_label=2):
+def ideal_midline_from_deformed(deformed_midline_path, ideal_midline_path, overwrite=False, fill_label=2):
     if not os.path.exists(ideal_midline_path) or overwrite:
         deformed_nii = nib.load(str(deformed_midline_path))
-        mask = deformed_nii.get_fdata()
+        mask = (deformed_nii.get_fdata() > 0).astype(np.uint8)
 
         connected = np.zeros_like(mask, dtype=np.uint8)
         X, Y, Z = mask.shape
         for z in range(Z):
             sl = mask[:, :, z]
-            coords = np.argwhere(sl == label)
+            coords = np.argwhere(sl == 1)
             if coords.shape[0] < 2:
                 continue
             dists = np.sum((coords[:, None, :] - coords[None, :, :]) ** 2, axis=-1)
@@ -366,6 +366,7 @@ def update_midline(
     ncr_label=1,
     ed_label=2,
     et_label=3,
+    zero_overlap=False
 ):
     """
     Updates the midline to handle cases where the tumor extends across the anatomical midline.
@@ -402,9 +403,7 @@ def update_midline(
     smallest_volume_ideal = {}
     subregions = {"ncr": binary_ncr, "ed": binary_ed, "et": binary_et, "ncr_et": binary_ncr_et}
 
-    # -----------------------------
     # Compute per-side volumes and crossing flags
-    # -----------------------------
     for region in subregions.keys():
         volumes = split_mask_by_midline(binary_midline=binary_midline, mask=subregions[region])
         volumes_ideal = split_mask_by_midline(binary_midline=binary_ideal_midline, mask=subregions[region])
@@ -443,6 +442,9 @@ def update_midline(
     outer_shell_tumor = dilated_t & (~binary_ncr_et)
 
     updated_midline = ~(~(outer_shell_tumor & outer_shell)) | (binary_midline & ~binary_ncr_et)
+
+    if zero_overlap:
+        updated_midline = binary_midline & ~binary_ncr_et
 
     if crosses_ncr_et:
         logger.info(f"NCR + ET crosses midline...")
@@ -585,17 +587,29 @@ def midline_shift_3d(
     ed_label=2,
     et_label=4,
     overwrite=False,
+    naiive_midline_path=None,
+    zero_overlap=False 
 ):
+    '''
+    zero_overlap (bool): This variable only makes a difference in cases where the NCR+ET paer of the tumor
+                         overlaps with the midine. 
+                            If False:
+                                - The patient/subject midline will be adjusted to trace the outside boundaries of the tumor on the contralateral side to where the majority of the tumor is. This includes the tumor in the mideline calculation.
+                            If True:
+                                - The patient/subject midline will be set to zero in places where NCR + ET overlaps with the midline. This removes the overlapping from affecting the midline calculation.
+                                - This is the logic used by radiologists
+    '''    
+
 
     ideal_midline_from_deformed(
-        deformed_midline_path=deformed_midline_path,
+        deformed_midline_path=naiive_midline_path or deformed_midline_path,
         ideal_midline_path=ideal_midline_path,
         overwrite=overwrite,
     )
 
     if tumor is not None:
         metadata = update_midline(
-            subject_midline_path=deformed_midline_path,
+            subject_midline_path=naiive_midline_path or deformed_midline_path,
             ideal_midline_path=ideal_midline_path,
             tumor_mask_path=tumor,
             updated_midline_save_path=deformed_midline_path,
@@ -603,6 +617,7 @@ def midline_shift_3d(
             ed_label=ed_label,
             et_label=et_label,
             overwrite=overwrite,
+            zero_overlap=zero_overlap
         )
     else:
         metadata = None
