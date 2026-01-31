@@ -85,11 +85,28 @@ def register_midline_to_subject(moved, transform, moving=MIDLINE, is_seg=True, w
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--moving", required=True)
-    parser.add_argument("--fixed", required=True)
-    parser.add_argument("--moved", required=True)
-    parser.add_argument("--transform", required=True)
-    parser.add_argument("--wrapper", default=WRAPPER, required=False)
-    parser.add_argument("--subjects_dir", default=SUBJECTS_DIR, required=False)
+    # parser.add_argument("--moving", required=True)
+    # parser.add_argument("--fixed", required=True)
+    # parser.add_argument("--moved", required=True)
+    # parser.add_argument("--transform", required=True)
+    # parser.add_argument("--wrapper", default=WRAPPER, required=False)
+    # parser.add_argument("--subjects_dir", default=SUBJECTS_DIR, required=False)
+
+    parser.add_argument("--moving", required=True, type=os.path.realpath)
+    parser.add_argument("--fixed", required=True, type=os.path.realpath)
+    parser.add_argument("--moved", required=True, type=os.path.realpath)
+    parser.add_argument("--transform", required=True, type=os.path.realpath)
+    parser.add_argument("--wrapper", default=WRAPPER, type=os.path.realpath)
+    parser.add_argument("--subjects_dir", default=SUBJECTS_DIR, type=os.path.realpath)
+
+
+    parser.add_argument("--apply", action="store_true", required=False)
+    parser.add_argument("--is_seg", action="store_true", required=False)
+    
+
     args = parser.parse_args()
-    run_registration(moving=args.moving, fixed=args.fixed, moved=args.moved, transform=args.transform, wrapper=args.wrapper, subjects_dir=args.subjects_dir)
+
+    if args.apply:
+        run_apply(args.transform, args.moving, args.moved, args.wrapper, args.subjects_dir, is_seg=args.is_seg)
+    else:
+        run_registration(moving=args.moving, fixed=args.fixed, moved=args.moved, transform=args.transform, wrapper=args.wrapper, subjects_dir=args.subjects_dir)
