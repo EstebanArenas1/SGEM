@@ -1,6 +1,6 @@
 <h1 align="center">BTReport</h1>
 <p align="center">
-    <a href="./assets/MIDL_2026_BTReport__Latest_.pdf">arXiv</a> |
+    <a href="./assets/MIDL_2026_BTReport_revised_manuscript_Final.pdf">arXiv</a> |
     <a href="#bibtex">BibTeX</a> |
     <a href="#btreport-brats23-dataset">Dataset</a> |
     <a href="#clinical-evaluation-platform">Clinical Evaluation Platform</a>
