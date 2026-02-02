@@ -57,6 +57,7 @@ def check_ollama_server():
             check=True,
         )
         print(f"Ollama server found at {host}")
+        return True
     except Exception:
         raise RuntimeError(f"Ollama server at {host} not reachable")
 

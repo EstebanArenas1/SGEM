@@ -89,9 +89,14 @@ def main():
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--ncr_label", type=int, default=1)
     parser.add_argument("--ed_label", type=int, default=2)
-    parser.add_argument("--et_label", type=int, default=4)
+    parser.add_argument("--et_label", type=int, default=3)
     parser.add_argument("--llm", type=str, default="gpt-oss:120b")
+    parser.add_argument("--run_name", type=str, default="v0")
+
     parser.add_argument("--eval", action="store_true")
+    
+    parser.add_argument("--merged_json", type=str, default="merged_reports_btreport.json")
+
 
     args = parser.parse_args()
 
@@ -130,9 +135,9 @@ def main():
     )
 
 
-    for entry in split_subjects:
+    for ix, entry in enumerate(split_subjects):
         subject_dir = os.path.join(root, entry)
-        logger.info(f"\n=== Processing {entry} ===")
+        logger.info(f"\n[{ix+1}/{len(split_subjects)}]\n=== Processing {entry} ===")
 
         start_ts = time.time()
         start_iso = datetime.utcnow().isoformat()
@@ -146,6 +151,7 @@ def main():
             "--ed_label", str(args.ed_label),
             "--et_label", str(args.et_label),
             "--llm", llm,
+            "--run_name", args.run_name,
         ]
 
         if args.clear_tmp:
@@ -153,13 +159,21 @@ def main():
         if args.overwrite:
             cmd.append("--overwrite")
 
-        subprocess.run(cmd, check=True)
+        try:
+            subprocess.run(cmd, check=True)
 
-        update_merged_reports(
-            root_dir=root,
-            subject_id=entry,
-            llm=llm,
-        )
+            update_merged_reports(
+                root_dir=root,
+                subject_id=entry,
+                llm=llm,
+                run_name=args.run_name,
+                output_filename= args.merged_json,
+            )
+
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Generate failed for {entry}")
+            logger.error(e)
+            continue  
 
         end_ts = time.time()
         end_iso = datetime.utcnow().isoformat()
@@ -210,7 +224,7 @@ def append_runtime_csv(csv_path, row, header):
         fcntl.flock(f, fcntl.LOCK_UN)
 
 
-def update_merged_reports(root_dir, subject_id, llm, real_report_key="Clinical Report", output_filename="merged_reports_btreport.json", subject_report_filename="patient_metadata_btreport.json"):
+def update_merged_reports(root_dir, subject_id, llm, run_name, real_report_key="Clinical Report", output_filename="merged_reports_btreport.json", subject_report_filename="patient_metadata_btreport.json"):
     merged_path = os.path.join(root_dir, output_filename)
     if os.path.exists(merged_path):
         with open(merged_path, "r") as f:
@@ -230,8 +244,8 @@ def update_merged_reports(root_dir, subject_id, llm, real_report_key="Clinical R
         logger.info(f"Failed to read {subject_report_path}: {e}")
         return
 
-    bt_generated_key = f"BTReport Generated Report ({llm})"
-    predicted_key = f"Predicted Report ({llm})"
+    bt_generated_key = f"BTReport Generated Report ({llm}, run_name={run_name})"
+    predicted_key = f"Predicted Report ({llm}, run_name={run_name} )"
 
     if subject_id not in merged:
         merged[subject_id] = {}
@@ -275,9 +289,19 @@ def update_merged_reports(root_dir, subject_id, llm, real_report_key="Clinical R
             f.flush()
             os.fsync(f.fileno())
 
+        if not os.path.exists(tmp_path):
+            logger.warning(
+                f"Temp file {tmp_path} missing; skipping replace."
+            )
+            fcntl.flock(lock_f, fcntl.LOCK_UN)
+            return
+
         os.replace(tmp_path, merged_path)
 
+
         fcntl.flock(lock_f, fcntl.LOCK_UN)
+
+
 
 
 if __name__ == "__main__":

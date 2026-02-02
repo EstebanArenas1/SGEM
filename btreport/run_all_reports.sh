@@ -1,15 +1,15 @@
 #!/bin/bash
 #SBATCH --job-name=BTReport
-#SBATCH --partition=gpu-a40
+#SBATCH --partition=ckpt
 #SBATCH --account=kurtlab
-#SBATCH --array=0-5
+#SBATCH --array=0-9
 #SBATCH --gpus-per-node=a40:2
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=48:00:00
 #SBATCH --chdir=/gscratch/scrubbed/juampablo/BTReportEval/BTReport
-#SBATCH --output=logs/%A/btreport-%A_%a.out
-#SBATCH --error=logs/%A/btreport-%A_%a.err
+#SBATCH --output=logs/generate/%A/btreport-%A_%a.out
+#SBATCH --error=logs/generate/%A/btreport-%A_%a.err
 
 
 echo "=========================================="
@@ -44,8 +44,10 @@ tmux has-session -t ollama_server || {
 export PYTHONUNBUFFERED=1
 python3 -m btreport.run_all_reports \
   --root_folder data \
-  --num_splits 6 \
-  --split_no ${SLURM_ARRAY_TASK_ID} 
-  # --llm llama3:70b
+  --num_splits 10 \
+  --split_no ${SLURM_ARRAY_TASK_ID}  \
+  --run_name "deepmedic" \
+  --merged_json /gscratch/scrubbed/juampablo/BTReportEval/BTReport/data/merged_reports_btreport_V3_llama.json \
+  --llm llama3:70b
 
 echo "Array task ${SLURM_ARRAY_TASK_ID} finished."
