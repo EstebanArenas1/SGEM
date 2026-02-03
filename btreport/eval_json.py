@@ -33,9 +33,17 @@ def eval_json(
                 for sid, metrics in d.items():
                     existing_lookup[str(sid)] = metrics
 
+        # # check that keys exist
+        # assert args.real_report_key in metadata, f"Missing real report key '{args.real_report_key}' in {args.json}"
+        # assert args.synthetic_report_key in metadata,  f"Missing synthetic report key '{args.synthetic_report_key}' in {args.json}"
         # check that keys exist
-        assert args.real_report_key in metadata, f"Missing real report key '{args.real_report_key}' in {args.json}"
-        assert args.synthetic_report_key in metadata, f"Missing synthetic report key '{args.synthetic_report_key}' in {args.json}"
+        if args.real_report_key not in metadata:
+            print(f"⚠️  Missing real report key '{args.real_report_key}' in {args.json}, skipping")
+            continue
+
+        if args.synthetic_report_key not in metadata:
+            print(f"⚠️  Missing synthetic report key '{args.synthetic_report_key}' in {args.json}, skipping")
+            continue
 
         # # separate both real and generated reports into sections (e.g. FINDINGS, BRAIN, MASS EFFECT & VENTRICLES, etc.)
         real_reports = metadata[args.real_report_key]

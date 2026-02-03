@@ -7,10 +7,15 @@ from RadEval import RadEval, compare_systems
 
 
 EVAL_JSONS = {
-    "BTReport (gpt-oss-120b)": "/pscratch/sd/j/jehr/MSFT/BTReport/data/example/merged_reports_btreport_eval_results_details.json",
-    "BTReport (llama3-70b)": "/pscratch/sd/j/jehr/MSFT/BTReport/data/example/merged_reports_btreport_llama3_70b_eval_results_details.json",
-    "AutoRG-Brain": "/pscratch/sd/j/jehr/MSFT/BTReport_evaluation/AutoRG_Brain_weights/autorg_reports_uwimaging_eval_results_details.json",
-    "seg2exp": "/pscratch/sd/j/jehr/MSFT/BTReport_evaluation/from-segmentation-to-explanation/saved/seg2exp_reports_uwimaging_eval_results_details.json",
+    # 'BTReport (gpt-oss-120b)': '/pscratch/sd/j/jehr/MSFT/BTReport/merged_reports_btreport_V3_eval_results_details.json',
+    'BTReport (llama3-70b)': '/pscratch/sd/j/jehr/MSFT/BTReport/merged_reports_btreport_V3_llama__run_name_deepmedic_llama3_eval_results_details.json',
+
+    'BTReport (gpt-oss-120b, Variant 1)': '/pscratch/sd/j/jehr/MSFT/BTReport/results/deepmedic/merged_reports_btreport__run_name_deepmedic_eval_results_details.json',
+
+    'BTReport (gpt-oss-120b, Variant 2)': '/pscratch/sd/j/jehr/MSFT/BTReport/results/fakin/merged_reports_btreport_eval_results_details.json',
+
+    'AutoRG-Brain': "/pscratch/sd/j/jehr/MSFT/BTReport/merged_reports_btreport_V3_autorg_eval_results_details.json",
+    'seg2exp': "/pscratch/sd/j/jehr/MSFT/BTReport/merged_reports_btreport_V3_seg2exp_filtered_eval_results_details.json",
 }
 
 REPORT_JSONS_DICT = {
@@ -102,18 +107,148 @@ def process_eval_json(json_path):
     return pd.DataFrame(rows)
 
 
-def print_eval_metrics(eval_jsons_dict=EVAL_JSONS):
+# def print_eval_metrics(eval_jsons_dict=EVAL_JSONS, precision=4):
+#     results_summary = {}
+
+#     eval_dfs = {}
+#     subject_sets = []
+
+#     # Load and collect subject sets
+#     for name, eval_json in eval_jsons_dict.items():
+#         df = process_eval_json(eval_json)
+#         eval_dfs[name] = df
+
+#         if "subject_id" not in df.columns:
+#             raise ValueError(f"{name}: 'subject_id' column missing")
+
+#         subject_sets.append(set(df["subject_id"]))
+
+#     common_subjects = set.intersection(*subject_sets)
+#     if not common_subjects:
+#         raise ValueError("No subjects are common across all eval JSONs")
+
+#     # Compute mean metrics on common subjects
+#     for name, df in eval_dfs.items():
+#         df = df[df["subject_id"].isin(common_subjects)]
+
+#         numeric_df = df.drop(columns=["subject_id"], errors="ignore")
+#         numeric_df = numeric_df.select_dtypes(include="number")
+
+#         results_summary[name] = numeric_df.mean().to_dict()
+
+#     # -------- pretty table print --------
+#     metric_names = sorted({
+#         metric
+#         for model_metrics in results_summary.values()
+#         for metric in model_metrics.keys()
+#     })
+#     model_names = list(results_summary.keys())
+
+#     col_widths = {
+#         "metric": max(len("Metric"), max(len(m) for m in metric_names))
+#     }
+#     for model in model_names:
+#         col_widths[model] = max(len(model), 10)
+
+#     header = (
+#         f"{'Metric'.ljust(col_widths['metric'])} | " +
+#         " | ".join(model.ljust(col_widths[model]) for model in model_names)
+#     )
+#     sep = "-" * len(header)
+
+#     print(sep)
+#     print(f"Evaluated on {len(common_subjects)} common subjects")
+#     print(sep)
+#     print(header)
+#     print(sep)
+
+#     for metric in metric_names:
+#         row = [metric.ljust(col_widths["metric"])]
+
+#         for model in model_names:
+#             val = results_summary[model].get(metric)
+#             cell = "-" if val is None else f"{val:.{precision}f}"
+#             row.append(cell.ljust(col_widths[model]))
+
+#         print(" | ".join(row))
+
+#     print(sep)
+ 
+
+def print_eval_metrics(eval_jsons_dict=EVAL_JSONS, precision=4):
     results_summary = {}
+
+    eval_dfs = {}
+    subject_sets = []
+
+    # Load and collect subject sets
     for name, eval_json in eval_jsons_dict.items():
-        eval_df = process_eval_json(eval_json)
+        df = process_eval_json(eval_json)
+        eval_dfs[name] = df
 
-        numeric_df = eval_df.drop(columns=["subject_id"], errors="ignore")
+        if "subject_id" not in df.columns:
+            raise ValueError(f"{name}: 'subject_id' column missing")
+
+        subject_sets.append(set(df["subject_id"]))
+
+    common_subjects = set.intersection(*subject_sets)
+    if not common_subjects:
+        raise ValueError("No subjects are common across all eval JSONs")
+
+    # Compute mean and std metrics on common subjects
+    for name, df in eval_dfs.items():
+        df = df[df["subject_id"].isin(common_subjects)]
+
+        numeric_df = df.drop(columns=["subject_id"], errors="ignore")
         numeric_df = numeric_df.select_dtypes(include="number")
-        mean_metrics_df = numeric_df.mean().to_dict()
 
-        results_summary[name] = mean_metrics_df
+        results_summary[name] = {
+            col: (numeric_df[col].mean(), numeric_df[col].std())
+            for col in numeric_df.columns
+        }
 
-    print(json.dumps(results_summary, indent=2))
+    # -------- pretty table print --------
+    metric_names = sorted({
+        metric
+        for model_metrics in results_summary.values()
+        for metric in model_metrics.keys()
+    })
+    model_names = list(results_summary.keys())
+
+    col_widths = {
+        "metric": max(len("Metric"), max(len(m) for m in metric_names))
+    }
+    for model in model_names:
+        col_widths[model] = max(len(model), 18)
+
+    header = (
+        f"{'Metric'.ljust(col_widths['metric'])} | " +
+        " | ".join(model.ljust(col_widths[model]) for model in model_names)
+    )
+    sep = "-" * len(header)
+
+    print(sep)
+    print(f"Evaluated on {len(common_subjects)} common subjects")
+    print(sep)
+    print(header)
+    print(sep)
+
+    for metric in metric_names:
+        row = [metric.ljust(col_widths["metric"])]
+
+        for model in model_names:
+            stats = results_summary[model].get(metric)
+            if stats is None:
+                cell = "-"
+            else:
+                mean, std = stats
+                cell = f"{mean:.{precision}f} ± {std:.{precision}f}"
+            row.append(cell.ljust(col_widths[model]))
+
+        print(" | ".join(row))
+
+    print(sep)
+
 
 
 def print_significance_tests(REPORT_JSONS_DICT):

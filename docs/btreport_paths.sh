@@ -8,24 +8,19 @@
 
 
 # Singularity / Apptainer images
-export SYNTHMORPH_SIF=/mmfs1/gscratch/scrubbed/juampablo/synthmorph_4.sif
-export SYNTHSEG_SIF=/mmfs1/gscratch/scrubbed/juampablo/synthseg.sif
-export OLLAMA_SIF=/mmfs1/gscratch/scrubbed/juampablo/ollama.sif
+export SYNTHMORPH_SIF=/pscratch/sd/j/jehr/synthmorph/synthmorph_4.sif
+export SYNTHSEG_SIF=/pscratch/sd/j/jehr/synthseg/synthseg.sif
+export OLLAMA_SIF=/pscratch/sd/j/jehr/ollama/ollama.sif
 
+export SUBJECTS_DIR=/pscratch # Relative directory from which subject files are referenced inside containers. Usually I set this to the root of my scratch space.
 
-export OLLAMA_MODELS=/mmfs1/gscratch/scrubbed/juampablo/ollama_models # Ollama model storage (should be on large-capacity storage)
-export SUBJECTS_DIR=/mmfs1 # Relative directory from which subject files are referenced inside containers. Usually I set this to the root of my scratch space so I dont have to deal with relative paths.
-
-
-
-
-
-## Below here should not need to be changed ##
-
+# Ollama model storage (should be on large-capacity storage)
+export OLLAMA_MODELS=/pscratch/sd/j/jehr/ollama/ollama_models
 export OLLAMA_HOST='http://127.0.0.1:11434'
 unset http_proxy https_proxy all_proxy
 unset HTTP_PROXY HTTPS_PROXY ALL_PROXY
 
+export PATH=${PATH}:/cvmfs/oasis.opensciencegrid.org/mis/apptainer/1.3.3/x86_64/bin
 
 if [ ! -x "$SYNTHMORPH_SIF" ]; then
     chmod +x "$SYNTHMORPH_SIF"
