@@ -43,6 +43,17 @@ The framework consists of four components:
 -  **[midline_shift](./btreport/midline_shift/)** — quantitative estimation of 3D midline shift using a deep learning registration approach.
 -  **[llm_report_generation](./btreport/llm_report_generation/)** — LLM synthesis of structured radiology reports grounded in deterministic features.
 
+<details>
+<summary>Results</summary>
+<p align="center">
+<img src="assets/table3.png" width="600">
+</p>
+
+<p align="center">
+<img src="assets/table4.png" width="600">
+</p>
+</details>
+
 ![-----------------------------------------------------](assets/purpleline.png)
 ## Example findings generated with BTReport
 <p align="center">
