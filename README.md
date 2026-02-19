@@ -1,19 +1,20 @@
 <h1 align="center">BTReport</h1>
 <p align="center">
-    <a href="./assets/MIDL_2026_BTReport_revised_manuscript_Final.pdf">arXiv</a> |
+    <a href="https://arxiv.org/abs/2602.16006">arXiv</a> |
     <a href="#bibtex">BibTeX</a> |
     <a href="#btreport-brats23-dataset">Dataset</a> |
     <a href="#clinical-evaluation-platform">Clinical Evaluation Platform</a>
 </p>
 
-<!-- [![arXiv](https://img.shields.io/badge/arXiv-2112.1075-b31b1b.svg)](https://arxiv.org/abs/2112.1075)  -->
+
+<!-- [![arXiv](https://img.shields.io/badge/arXiv-2602.16006-b31b1b.svg)](https://arxiv.org/abs/2602.16006) -->
 
 
 <p align="center">
 <img src=assets/overview.gif />
 </p>
 
-### [**BTReport: A Framework for Brain Tumor Radiology Report Generation with Clinically Relevant Features**](./assets/MIDL_2026_BTReport_revised_manuscript_Final.pdf)<br/>
+### [**BTReport: A Framework for Brain Tumor Radiology Report Generation with Clinically Relevant Features**](https://arxiv.org/abs/2602.16006)<br/>
 [Juampablo E. Heras Rivera](https://juampabloheras.github.io/)\*, Dickson T. Chen\*, Tianyi Ren, Daniel K. Low,  <br/>
 Jacob Ruzevick, Asma Ben Abacha, Alberto Santamaria-Pang, Mehmet Kurt<br/>
 \*equal contribution
