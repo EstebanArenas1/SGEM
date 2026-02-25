@@ -11,7 +11,7 @@
 
 
 <p align="center">
-<img src=assets/overview2.gif />
+  <img src="assets/overview.gif" width="900">
 </p>
 
 ### [**BTReport: A Framework for Brain Tumor Radiology Report Generation with Clinically Relevant Features**](https://arxiv.org/abs/2602.16006)<br/>
