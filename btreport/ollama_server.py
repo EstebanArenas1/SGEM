@@ -57,6 +57,7 @@ def check_ollama_server():
             check=True,
         )
         print(f"Ollama server found at {host}")
+        return True
     except Exception:
         raise RuntimeError(f"Ollama server at {host} not reachable")
 
@@ -69,20 +70,47 @@ def pull_llm(model):
     env = os.environ.copy()
     env["APPTAINERENV_OLLAMA_MODELS"] = models
 
+    # subprocess.run(
+    #     [
+    #         "apptainer",
+    #         "exec",
+    #         "--env",
+    #         # "-B", "/etc/pki:/etc/pki",
+    #         f"OLLAMA_HOST={os.environ['OLLAMA_HOST']}",
+    #         # "--env", ENV,
+    #         "-B", f"{Path(models).parent}:{Path(models).parent}",
+    #         # "-B",
+    #         f"{Path(models)}:{Path(models)}",
+    #         sif,
+    #         "ollama",
+    #         "pull",
+    #         model,
+    #     ],
+    #     check=True,
+    #     env=env,
+    # )
     subprocess.run(
         [
             "apptainer",
             "exec",
-            "--env",
-            f"OLLAMA_HOST={os.environ['OLLAMA_HOST']}",
-            # "--env", ENV,
-            # "-B", f"{Path(models).parent}:{Path(models).parent}",
-            "-B",
-            f"{Path(models)}:{Path(models)}",
+
+            # Bind host CA bundle
+            "-B", "/etc/pki:/etc/pki",
+
+            # Ollama server location
+            "--env", f"OLLAMA_HOST={os.environ['OLLAMA_HOST']}",
+
+            # Force Go to use correct CA bundle
+            "--env", "SSL_CERT_FILE=/etc/pki/tls/certs/ca-bundle.crt",
+
+            # Bind Ollama models directory (THIS was broken)
+            "-B", f"{Path(models)}:{Path(models)}",
+
+            # Container image (ONLY the .sif goes here)
             sif,
-            "ollama",
-            "pull",
-            model,
+
+            # Command inside container
+            "ollama", "pull", model,
         ],
         check=True,
         env=env,
