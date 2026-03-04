@@ -10,18 +10,8 @@ import os, shutil, glob, json
 import argparse
 from os.path import join
 
-"""
-conda activate BTReport
-export SYNTHMORPH_SIF=/pscratch/sd/j/jehr/synthmorph/synthmorph_4.sif
-export PATH=${PATH}:/cvmfs/oasis.opensciencegrid.org/mis/apptainer/1.3.3/x86_64/bin
-export SYNTHSEG_SIF=/pscratch/sd/j/jehr/synthseg/synthseg.sif
-python3 -m btreport.generate_report --subject_folder $SF --llm llama3:70b
-
-python3 -m btreport.eval_json --skip_processed --no-parse-synthetic --do_details --json /pscratch/sd/j/jehr/MSFT/BTReport/data/example/merged_reports_btreport_llama3_70b.json
-"""
 
 
-# python3 -m btreport.eval_json --skip_processed --no-parse-synthetic --do_details --json /pscratch/sd/j/jehr/MSFT/BTReport_evaluation/from-segmentation-to-explanation/savedv1/seg2exp_reports_uwimaging_22513869714470.json
 def main(args: argparse.Namespace):
     t1_path = glob.glob(os.path.join(args.subject_folder, "*-t1n.nii.gz"))[0]
     tumor_path = glob.glob(os.path.join(args.subject_folder, "*-seg.nii.gz"))[0]

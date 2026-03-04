@@ -1,11 +1,10 @@
 <h1 align="center">BTReport</h1>
 <p align="center">
-    <a href="./assets/MIDL_2026_BTReport_revised_manuscript_Final.pdf">arXiv</a> |
+    <a href="https://arxiv.org/abs/2602.16006">arXiv</a> |
     <a href="#bibtex">BibTeX</a> |
     <a href="#btreport-brats23-dataset">Dataset</a> |
     <a href="#clinical-evaluation-platform">Clinical Evaluation Platform</a>
 </p>
-
 
 <!-- [![arXiv](https://img.shields.io/badge/arXiv-2602.16006-b31b1b.svg)](https://arxiv.org/abs/2602.16006) -->
 
