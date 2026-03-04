@@ -8,24 +8,20 @@
 
 
 # Singularity / Apptainer images
-export SYNTHMORPH_SIF=/mmfs1/gscratch/scrubbed/juampablo/synthmorph_4.sif
-export SYNTHSEG_SIF=/mmfs1/gscratch/scrubbed/juampablo/synthseg.sif
-export OLLAMA_SIF=/mmfs1/gscratch/scrubbed/juampablo/ollama.sif
-
-export SUBJECTS_DIR=/pscratch # Relative directory from which subject files are referenced inside containers. Usually I set this to the root of my scratch space.
-
-export OLLAMA_MODELS=/mmfs1/gscratch/scrubbed/juampablo/ollama_models # Ollama model storage (should be on large-capacity storage)
-export SUBJECTS_DIR=/mmfs1 # Relative directory from which subject files are referenced inside containers. Usually I set this to the root of my scratch space so I dont have to deal with relative paths.
-
-
-
+export SYNTHMORPH_SIF=/path/to/synthmorph_4.sif
+export SYNTHSEG_SIF=/path/to/synthseg.sif
+export OLLAMA_SIF=/path/to/ollama.sif
+export SUBJECTS_DIR=/ # Relative directory from which subject files are referenced inside containers. Usually I set this to the root of my scratch space so I dont have to deal with relative paths.
 
 
 ## Below here should not need to be changed ##
-
-export OLLAMA_HOST='http://127.0.0.1:11434'
+export OLLAMA_MODELS=/path/to/ollama_models
+export OLLAMA_HOST='http://127.0.0.1:50505'
 unset http_proxy https_proxy all_proxy
 unset HTTP_PROXY HTTPS_PROXY ALL_PROXY
+
+mkdir -p $OLLAMA_MODELS
+
 
 export PATH=${PATH}:/cvmfs/oasis.opensciencegrid.org/mis/apptainer/1.3.3/x86_64/bin
 
