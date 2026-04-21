@@ -2,9 +2,25 @@
 <p align="center">
     <a href="https://arxiv.org/abs/2602.16006">arXiv</a> |
     <a href="#bibtex">BibTeX</a> |
-    <a href="#btreport-brats23-dataset">Dataset</a> |
+    <a href="https://huggingface.co/datasets/kurtlab/BTReport-BraTS23">Dataset</a> |
     <a href="#clinical-evaluation-platform">Clinical Evaluation Platform</a>
 </p>
+
+
+<!-- <p align="center">
+  <a href="https://arxiv.org/abs/2602.16006">
+    <img src="https://img.shields.io/badge/arXiv-2602.16006-B31B1B?style=for-the-badge&logo=arxiv&logoColor=white" alt="arXiv">
+  </a>
+  <a href="#bibtex">
+    <img src="https://img.shields.io/badge/BibTeX-Citation-4B0082?style=for-the-badge&logo=latex&logoColor=white" alt="BibTeX">
+  </a>
+  <a href="https://huggingface.co/datasets/kurtlab/BTReport-BraTS23">
+    <img src="https://img.shields.io/badge/Dataset-BraTS23-FDEE21?style=for-the-badge&logo=huggingface&logoColor=black" alt="Dataset">
+  </a>
+  <a href="#clinical-evaluation-platform">
+    <img src="https://img.shields.io/badge/Platform-Clinical_Eval-34495E?style=for-the-badge" alt="Clinical Evaluation Platform">
+  </a>
+</p> -->
 
 <!-- [![arXiv](https://img.shields.io/badge/arXiv-2602.16006-b31b1b.svg)](https://arxiv.org/abs/2602.16006) -->
 
