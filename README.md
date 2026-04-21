@@ -2,7 +2,7 @@
 <p align="center">
     <a href="https://arxiv.org/abs/2602.16006">arXiv</a> |
     <a href="#bibtex">BibTeX</a> |
-    <a href="https://huggingface.co/datasets/kurtlab/BTReport-BraTS23">Dataset</a> |
+    <a href="https://huggingface.co/datasets/kurtlab/BTReport-BraTS23"> BTReport-BraTS23 Dataset</a> |
     <a href="#clinical-evaluation-platform">Clinical Evaluation Platform</a>
 </p>
 
