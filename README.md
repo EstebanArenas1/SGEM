@@ -84,6 +84,36 @@ A solitary, markedly enhancing lesion centered in the right cortex involving the
 
 ![-----------------------------------------------------](assets/purpleline.png)
 
+## BTReport-BraTS23 Dataset
+ We provide a companion dataset which augments BraTS'23 imaging with BTReport-generated reports to further research in neuro-oncology report generation.
+ 
+ The dataset contains reports generated with gpt-oss:120b and llama3:70b, and can be found in the [`BTReport-BraTS23 HuggingFace`](https://huggingface.co/datasets/kurtlab/BTReport-BraTS23).
+
+
+<!-- 
+For each subject, entries in the CSV look like:
+
+
+| Subject_ID | Predicted Report (llama3:70b) | Predicted Report (gpt-oss:120b) |
+| :--- | :--- | :--- |
+| **BraTS-GLI-00000-000** | **FINDINGS** <br/> **MASS EFFECT & VENTRICLES:** <br/> There is a minimal left-to-right midline shift of approximately 4 mm at the level of the septum pellucidum. No significant ventricular asymmetry is identified... | **FINDINGS** <br/> **MASS EFFECT & VENTRICLES:** <br/> There is a minimal left-to-right midline shift of approximately 4 mm at the level of the septum pellucidum. The left lateral ventricle is effaced in its anterior horns... |
+ -->
+ 
+### Quick start
+```python
+from datasets import load_dataset # after pip install datasets
+
+# Load the dataset from HuggingFace
+dataset = load_dataset("kurtlab/BTReport-BraTS23")
+
+# Access a specific subject's reports
+example = dataset['train'][0]
+print(f"Subject: {example['subject_id']}")
+print(f"Llama3 Report: {example['Predicted Report (llama3:70b)']}")
+print(f"Llama3 Report: {example['Predicted Report (gpt-oss:120b)']}")
+
+```
+![-----------------------------------------------------](assets/purpleline.png)
 
 ## Installation (~1.5 hours)
 
@@ -176,22 +206,6 @@ python3 -m btreport.eval_json \
 ```
 
 ![-----------------------------------------------------](assets/purpleline.png)
-
-## BTReport-BraTS23 Dataset
- We provide a companion dataset which augments BraTS'23 imaging with these features to further research in neuro-oncology report generation.
- 
- The dataset contains reports generated with gpt-oss:120b and llama3:70b, and can be found in the [`BTReport-BraTS23 HuggingFace`](https://huggingface.co/datasets/kurtlab/BTReport-BraTS23).
-
-For each subject, entries in the CSV look like:
-
-
-
-| Subject_ID | Predicted Report (llama3:70b) | Predicted Report (gpt-oss:120b) |
-| :--- | :--- | :--- |
-| **BraTS-GLI-00000-000** | **FINDINGS** <br/> **MASS EFFECT & VENTRICLES:** <br/> There is a minimal left-to-right midline shift of approximately 4 mm at the level of the septum pellucidum. No significant ventricular asymmetry is identified... | **FINDINGS** <br/> **MASS EFFECT & VENTRICLES:** <br/> There is a minimal left-to-right midline shift of approximately 4 mm at the level of the septum pellucidum. The left lateral ventricle is effaced in its anterior horns... |
-
-
-
 
 ## Clinical Evaluation Platform
 https://github.com/user-attachments/assets/00887ae6-b4be-43b7-9c71-7c4db8572433
