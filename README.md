@@ -233,11 +233,12 @@ Check out the platform at: [https://clinical-evaluation-btreport.onrender.com/](
 ## BibTeX
 
 ```
-@inproceedings{rivera2025btreport,
+@inproceedings{rivera2026btreport,
       title={{BTReport: A Framework for Brain Tumor Radiology Report Generation with Clinically Relevant Features}},
       author={Juampablo E Heras Rivera and Dickson T Chen and Tianyi Ren and Daniel Low and Asma Ben Abacha and Alberto Santamaria-Pang and Mehmet Kurt},
-      booktitle={Submitted to Medical Imaging with Deep Learning},
-      year={2025},
+      booktitle={Proceedings of Medical Imaging with Deep Learning (MIDL)},
+      year={2026},
       url={https://openreview.net/forum?id=ldnKG4OjD1},
-      note={under review}
+      note={Accepted}
 }
+
