@@ -2,6 +2,8 @@ from .utils import register, plotting, anat_segmentation
 from .utils.log import get_logger
 from .llm_report_generation.ollama_report_gen import generate_llm_report
 from .midline_shift.midline_shift3d import midline_shift_3d
+from .utils.clasificar_cisternas import clasificar_cisternas
+from .utils.mls_septum import medir_mls_septum
 from .vasari_features import ExtractVASARI
 
 # from .vasari_features.extract_vasari_features import vasari_features
@@ -55,6 +57,15 @@ def main(args: argparse.Namespace):
     register.apply_transform(moving=tumor_path, moved=tum_in_mni, transform=sub_tfm, is_seg=True)  # register tumor mask to MNI152 space using sub_tfm
     logger.info(f"* Finished registration steps!")
 
+    # Registrar atlas de cisternas al espacio del paciente (SGEM)
+    logger.info(f"** [SGEM] Registrando atlas de cisternas al espacio del paciente...")
+    cisterna_en_paciente = join(tmp_dir, "cistern_in_subject_space.nii.gz")
+    CISTERN_ATLAS = join(os.path.dirname(__file__), "utils", "Cistern_Segmentations.nii.gz")
+    register.apply_transform(moving=CISTERN_ATLAS, moved=cisterna_en_paciente, transform=mni_tfm, is_seg=True)
+    cistern_summary = clasificar_cisternas(cisterna_en_paciente, tumor_path)
+    metadata.update(cistern_summary)
+    logger.info(f"* Cisternas basales: {cistern_summary['cisterns_status']} (CR={cistern_summary['compression_ratio']})")
+
     # SynthSeg is unreliable on images with tumors, so we run it on the (healthy) MNI atlas registered to the subject space, then overlay the tumor mask.
     logger.info(f"** [1/4] Starting anatomical segmentation steps...")
     anatseg = mni_in_subj.replace(".nii.gz", "_synthseg.nii.gz")
@@ -77,6 +88,11 @@ def main(args: argparse.Namespace):
 
     logger.info(f"* Finished segmentation steps! Merged mask can be found in {merged_seg}")
 
+    # Medir MLS por septum pellucidum (SGEM)
+    logger.info(f"** [SGEM] Midiendo MLS por septum pellucidum...")
+    mls_summary = medir_mls_septum(anatseg)
+    metadata.update(mls_summary)
+    logger.info(f"* MLS septum: {mls_summary['mls_septum_mm']} mm — {mls_summary['mls_categoria']}")
     # Extract midline shift features
     logger.info(f"** [2/4] Starting midline shift processing...")
     midline_summary = midline_shift_3d(tumor=tumor_path, 
@@ -128,6 +144,12 @@ def main(args: argparse.Namespace):
         # "level_max_shift",
         "midline_shift_present",
         "Text Report",
+        # Módulos SGEM
+        "cisterns_status",
+        "compression_ratio",
+        "mls_septum_mm",
+        "mls_direccion",
+        "mls_categoria",
     ]
     if metadata_no_clinical['midline_shift_present'] == "Yes":
         keys_to_keep+=["level_max_shift", "max_shift_mm"]
