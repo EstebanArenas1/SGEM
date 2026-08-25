@@ -4,3 +4,4 @@ __pycache__/data/HPTU/
 test_*.nii.gz 
 *.png 
 __pycache__/ 
+data/ 
