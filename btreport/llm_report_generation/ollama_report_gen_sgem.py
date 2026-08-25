@@ -68,19 +68,21 @@ Ahora genera una sección de HALLAZGOS similar, usando ÚNICAMENTE los metadatos
 proporcionados a continuación.
 
 INSTRUCCIONES IMPORTANTES:
-- Escribe SOLO en español clínico formal, como lo haría un radiólogo colombiano.
-- NO inventes información que no esté directamente respaldada por los metadatos.
-- Mantén las subsecciones: EFECTO DE MASA Y VENTRÍCULOS, y LESIÓN Y REALCE.
-- Selecciona los 7-10 hallazgos más relevantes clínicamente.
-- Prioriza hallazgos anormales o clínicamente significativos.
-- Las secuencias disponibles son: T1n, T2, T2-FLAIR y T1-Gd. No menciones difusión.
-- Comenta siempre el desplazamiento de línea media usando el valor de mls_septum_mm
-  y mls_direccion. Menciona explícitamente que fue medido a nivel del septum pellucidum.
-- Comenta el estado de las cisternas basales usando cisterns_status y compression_ratio.
-- Comenta el efacement ventricular si está presente, indicando lado y cuerno afectado.
-- Indica las dimensiones de la lesión en 3D en centímetros.
-- NO menciones estructuras ni hallazgos que no estén respaldados por los metadatos.
-
+INSTRUCCIONES:
+- Escribe en español clínico formal.
+- Secciones: EFECTO DE MASA Y VENTRICULOS, y LESION Y REALCE.
+- Comenta el MLS usando mls_septum_mm y mls_direccion (medido en septum pellucidum).
+- Comenta cisternas basales usando cisterns_status y compression_ratio.
+- En LESION Y REALCE menciona SIEMPRE los volúmenes tumorales:
+  * Total_tumor_volume_mL es el volumen total del tumor
+  * NCR_volume_mL es el núcleo necrótico
+  * Realce_volume_mL es el componente con realce
+  * Edema_volume_mL es el edema perilesional
+- Calcula los porcentajes de cada componente sobre el total.
+- Si Total_tumor_volume_mL > 0, SIEMPRE describe la lesión aunque otros campos digan "por determinar".
+- Las secuencias disponibles son T1n, T2, T2-FLAIR y T1-Gd únicamente.
+- Selecciona los 7-10 hallazgos más relevantes.
+- NO inventes información no respaldada por los metadatos.
 METADATOS (paciente {subject_id}):
 {metadata_json}
 
